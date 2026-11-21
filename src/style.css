@@ -1,0 +1,134 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-display: 'Lexend', system-ui, sans-serif;
+
+  /* Paleta GuíaU Rural: azul y verde */
+  --color-night: #0b1b3a; /* azul medianoche: portada, logo, textos sobre menta */
+  --color-brand: #1b6b4c; /* verde medio: botones y enlaces */
+  --color-brand-dark: #134f38; /* verde medio más oscuro: hover */
+  --color-green-ink: #17724a; /* verde oscuro para texto */
+  --color-mint: #5bc78f; /* menta: acentos sobre fondos oscuros (nunca texto sobre claro) */
+  --color-mint-soft: #a8ebc6; /* menta claro: fondos suaves, siempre con texto azul medianoche */
+  --color-brand-soft: #eceff5; /* azul pálido: superficies y menú activo */
+  --color-paper: #f7f8fa; /* fondo */
+  --color-card: #ffffff;
+  --color-ink: #121a2b; /* texto principal */
+  --color-ink-soft: #5b6578; /* texto secundario */
+  --color-line: #cbd2de; /* borde de tarjetas */
+  --color-line-strong: #7c879b; /* borde de campos y botones (3,6:1) */
+
+  --color-ok-bg: #dcf6e8;
+  --color-ok-fg: #17724a;
+  --color-warn-bg: #fff0c2;
+  --color-warn-fg: #5c3b00;
+  --color-off-bg: #ecf0f5;
+  --color-off-fg: #3a4558;
+  --color-bad-bg: #fde8e6;
+  --color-bad-fg: #8c1d18;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px #fff;
+  }
+  button,
+  select,
+  input:not([type='checkbox']):not([type='radio']),
+  textarea {
+    min-height: 2.75rem;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-3 font-bold transition active:scale-[0.98];
+  }
+  .btn-primary {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 font-bold text-white transition hover:bg-brand-dark active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 border-brand bg-transparent px-5 py-3 font-bold text-brand transition hover:bg-brand-soft active:scale-[0.98];
+  }
+  .card {
+    @apply rounded-2xl border-2 border-line bg-card p-4;
+  }
+  .field {
+    @apply w-full rounded-xl border-2 border-line-strong bg-card px-3 py-2 text-ink;
+  }
+  .chip {
+    @apply inline-flex min-h-11 items-center rounded-full border-2 border-line-strong bg-card px-4 py-1.5 text-sm font-bold text-ink-soft;
+  }
+  .chip[aria-pressed='true'] {
+    @apply border-brand bg-brand text-white;
+  }
+}
+
+@layer utilities {
+  /* Entrada escalonada: cada elemento define su turno con --i. */
+  .aparece {
+    animation: subir 0.45s ease-out both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+  .sube {
+    transition: transform 0.15s ease-out, border-color 0.15s ease-out;
+  }
+  .sube:hover {
+    transform: translateY(-2px);
+  }
+  /* Puntos suaves de fondo para la portada (sin imagen pesada). */
+  .fondo-puntos {
+    background-image: radial-gradient(rgb(255 255 255 / 0.14) 1.6px, transparent 1.6px);
+    background-size: 22px 22px;
+  }
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}

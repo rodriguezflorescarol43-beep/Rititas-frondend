@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Guía de ingreso">
+  <rect width="512" height="512" fill="#F7F8FA"/>
+  <path d="M146 336 L256 154 L366 336" fill="none" stroke="#0B1B3A" stroke-width="30" stroke-linejoin="round"/>
+  <circle cx="146" cy="336" r="54" fill="#0B1B3A"/>
+  <circle cx="256" cy="154" r="54" fill="#1B6B4C"/>
+  <circle cx="366" cy="336" r="54" fill="#5BC78F"/>
+</svg>
