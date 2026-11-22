@@ -1,32 +1,17 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { api } from '../api/servicios'
 import { useAsync } from '../composables/useAsync'
 import AsyncState from '../components/AsyncState.vue'
 import PageHeader from '../components/PageHeader.vue'
 import PlanCarrera from '../components/PlanCarrera.vue'
 import PlanPreparate from '../components/PlanPreparate.vue'
-import StatusBadge from '../components/StatusBadge.vue'
 import { datosDelPaquete, estadoPaquete } from '../datos/paquete'
 import { planes as calcularPlanes } from '../datos/motor.js'
-import { descargarIcs, eventosDeConvocatoria } from '../utils/calendario'
-import { textoPlan, textoPlanes, urlWhatsApp } from '../utils/compartir'
-import { bs, TIPOS } from '../utils/format'
 
-const PRESUPUESTOS = [
-  ['', 'Sin límite'],
-  [100, 'Hasta Bs 100 al mes'],
-  [500, 'Hasta Bs 500 al mes'],
-  [1000, 'Hasta Bs 1.000 al mes'],
-  [2000, 'Hasta Bs 2.000 al mes'],
-]
+// La página es solo para Cochabamba: el test ya no pregunta departamento, presupuesto ni mudanza.
+const paso = ref('inicio') // inicio | test | resultado
 
-const paso = ref('condiciones') // condiciones | test | resultado
-const cond = ref({ departamento: '', presupuesto: '', puedeMudarse: true })
-const vivienda = ref('') // gasto mensual de vivienda y transporte si tuviera que mudarse
-const meses = ref(10)
-
-const { datos: meta } = useAsync(() => api.meta())
 const { datos: preguntas, error: errorPreguntas, cargando: cargandoPreguntas, ejecutar: recargarPreguntas } = useAsync(() =>
   api.preguntas(),
 )
@@ -40,7 +25,6 @@ const total = computed(() => preguntas.value?.length ?? 0)
 const resultado = ref(null)
 const errorResultado = ref(null)
 const calculando = ref(false)
-const avisoCalendario = ref('')
 
 function empezar() {
   indice.value = 0
@@ -67,41 +51,21 @@ function siguiente() {
 function atras() {
   aviso.value = ''
   if (indice.value > 0) indice.value--
-  else paso.value = 'condiciones'
+  else paso.value = 'inicio'
 }
-
-const datosDelTest = () => ({
-  opciones: Object.values(respuestas.value),
-  departamento: cond.value.departamento || null,
-  presupuesto_max_bs: cond.value.presupuesto === '' ? null : Number(cond.value.presupuesto),
-  puede_mudarse: cond.value.puedeMudarse,
-})
 
 async function calcular() {
   paso.value = 'resultado'
   calculando.value = true
   errorResultado.value = null
   try {
-    resultado.value = await api.resultado(datosDelTest())
+    resultado.value = await api.resultado({ opciones: Object.values(respuestas.value) })
   } catch (e) {
     errorResultado.value = e
   } finally {
     calculando.value = false
   }
 }
-
-// Simulador «¿y si…?»: al cambiar una condición se recalcula al instante, sin volver a hacer el test.
-watch(
-  () => [cond.value.departamento, cond.value.presupuesto, cond.value.puedeMudarse],
-  async () => {
-    if (paso.value !== 'resultado' || !resultado.value) return
-    try {
-      resultado.value = await api.resultado(datosDelTest())
-    } catch (e) {
-      errorResultado.value = e
-    }
-  },
-)
 
 // Los planes se calculan en el teléfono con el paquete de datos guardado.
 const paquete = computed(() => {
@@ -110,38 +74,25 @@ const paquete = computed(() => {
 })
 const misPlanes = computed(() => {
   if (!resultado.value || !paquete.value) return null
-  return calcularPlanes(paquete.value, resultado.value, {
-    departamento: cond.value.departamento,
-    presupuesto_max_bs: cond.value.presupuesto === '' ? null : Number(cond.value.presupuesto),
-    puede_mudarse: cond.value.puedeMudarse,
-    vivienda_mensual_bs: vivienda.value === '' ? null : Number(vivienda.value),
-    meses: Number(meses.value) || 10,
-  })
+  return calcularPlanes(paquete.value, resultado.value)
 })
 
-const imprimir = () => window.print()
-
-const enlaceWhatsApp = computed(() =>
-  resultado.value ? urlWhatsApp(textoPlan(resultado.value, { departamento: cond.value.departamento })) : '#',
-)
-const enlacePlanCompleto = computed(() => (misPlanes.value ? urlWhatsApp(textoPlanes(misPlanes.value)) : '#'))
-
-function recordatorios() {
-  avisoCalendario.value = ''
-  const eventos = []
-  const agregar = (conv, nombre) => {
-    if (conv && conv.estado !== 'cerrada') eventos.push(...eventosDeConvocatoria(conv, nombre, true))
+// «Carreras que te pueden interesar»: solo la carrera y de qué trata (sin universidad, costo ni convocatoria).
+// Una misma carrera suele estar en varias universidades: se muestra una sola vez.
+// Solo se usa la descripción si es una frase simple: sin costos ni enlaces (eso es información de ingreso).
+const esDescripcionSimple = (t) => !!t && t.length <= 160 && !/\bBs\b|https?:\/\//i.test(t)
+const carreras = computed(() => {
+  const vistas = new Set()
+  const lista = []
+  const descripciones = new Map((paquete.value?.carreras ?? []).map((c) => [c.id, c.descripcion]))
+  for (const r of resultado.value?.recomendaciones ?? []) {
+    const clave = r.carrera.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+    if (vistas.has(clave)) continue
+    vistas.add(clave)
+    lista.push({ id: r.carrera_id, nombre: r.carrera, texto: (esDescripcionSimple(descripciones.get(r.carrera_id)) && descripciones.get(r.carrera_id)) || `Encaja con tus intereses en ${r.area_nombre}.` })
   }
-  const p = misPlanes.value
-  agregar(p?.A?.convocatoria, p?.A?.carrera)
-  agregar(p?.B?.convocatoria, p?.B?.carrera)
-  agregar(p?.C?.proxima, 'Plan C')
-  if (!eventos.length) {
-    avisoCalendario.value = 'No hay fechas próximas para agregar a tu calendario.'
-    return
-  }
-  descargarIcs('mis-recordatorios-de-ingreso', eventos)
-}
+  return lista
+})
 </script>
 
 <template>
@@ -150,25 +101,7 @@ function recordatorios() {
     subtitulo="Responde 8 preguntas cortas y te mostramos carreras que encajan contigo, con el motivo de cada una."
   />
 
-  <section v-if="paso === 'condiciones'" aria-labelledby="t-cond" class="card max-w-xl space-y-4">
-    <h2 id="t-cond" class="text-xl">1. Tus condiciones</h2>
-    <label class="block">
-      <span class="mb-1 block font-bold">¿En qué departamento vives?</span>
-      <select v-model="cond.departamento" class="field">
-        <option value="">Prefiero no decirlo</option>
-        <option v-for="d in meta?.departamentos ?? []" :key="d" :value="d">{{ d }}</option>
-      </select>
-    </label>
-    <label class="block">
-      <span class="mb-1 block font-bold">¿Cuánto puedes pagar al mes?</span>
-      <select v-model="cond.presupuesto" class="field">
-        <option v-for="[valor, texto] in PRESUPUESTOS" :key="valor" :value="valor">{{ texto }}</option>
-      </select>
-    </label>
-    <label class="flex items-center gap-3">
-      <input v-model="cond.puedeMudarse" type="checkbox" class="size-6 accent-brand" />
-      <span class="font-bold">Puedo mudarme a otra ciudad para estudiar</span>
-    </label>
+  <section v-if="paso === 'inicio'" aria-label="Empezar el test" class="card max-w-xl space-y-4">
     <button type="button" class="btn-primary w-full" @click="empezar">
       Empezar el test <i class="ti ti-arrow-right" aria-hidden="true"></i>
     </button>
@@ -233,42 +166,10 @@ function recordatorios() {
           </li>
         </ul>
 
-        <!-- NUEVO: plan principal y dos salidas, con costo real del primer año -->
+        <!-- Plan principal y dos salidas -->
         <section aria-labelledby="t-planes" class="mb-10">
           <h2 id="t-planes" class="mb-1 text-xl">Tus planes: A, B y C</h2>
-          <p class="mb-4 max-w-2xl text-ink-soft">Un plan principal y dos salidas, por si no ingresas o no puedes mudarte.</p>
-
-          <div class="card mb-4 space-y-3">
-            <h3 class="text-lg">¿Y si cambian tus condiciones?</h3>
-            <p class="text-sm text-ink-soft">Cámbialas y los planes se recalculan al instante, en tu teléfono.</p>
-            <div class="grid gap-3 sm:grid-cols-2">
-              <label class="block">
-                <span class="mb-1 block text-sm font-bold">Departamento</span>
-                <select v-model="cond.departamento" class="field">
-                  <option value="">Prefiero no decirlo</option>
-                  <option v-for="d in meta?.departamentos ?? []" :key="d" :value="d">{{ d }}</option>
-                </select>
-              </label>
-              <label class="block">
-                <span class="mb-1 block text-sm font-bold">Cuánto puedes pagar al mes</span>
-                <select v-model="cond.presupuesto" class="field">
-                  <option v-for="[valor, texto] in PRESUPUESTOS" :key="valor" :value="valor">{{ texto }}</option>
-                </select>
-              </label>
-              <label class="flex items-center gap-3 sm:col-span-2">
-                <input v-model="cond.puedeMudarse" type="checkbox" class="size-6 accent-brand" />
-                <span class="font-bold">Puedo mudarme a otra ciudad</span>
-              </label>
-              <label v-if="cond.departamento" class="block">
-                <span class="mb-1 block text-sm font-bold">Vivienda y transporte al mes (Bs)</span>
-                <input v-model="vivienda" type="number" min="0" inputmode="numeric" class="field" placeholder="Si tendrías que mudarte" />
-              </label>
-              <label class="block">
-                <span class="mb-1 block text-sm font-bold">Meses de estudio al año</span>
-                <input v-model="meses" type="number" min="1" max="12" inputmode="numeric" class="field" />
-              </label>
-            </div>
-          </div>
+          <p class="mb-4 max-w-2xl text-ink-soft">Un plan principal y dos salidas.</p>
 
           <template v-if="misPlanes">
             <div class="grid gap-4 lg:grid-cols-2">
@@ -279,18 +180,7 @@ function recordatorios() {
               </p>
               <PlanPreparate v-if="misPlanes.C" :plan="misPlanes.C" />
             </div>
-            <p v-if="!misPlanes.A" class="card mt-4">
-              Con esas condiciones no encontramos un plan principal. Prueba con un presupuesto mayor o permitiendo mudarte.
-            </p>
-            <div class="no-print mt-4 flex flex-wrap gap-3">
-              <a :href="enlacePlanCompleto" target="_blank" rel="noopener" class="btn-primary">
-                <i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Enviar plan completo a mi familia
-              </a>
-              <button type="button" class="btn-ghost" @click="recordatorios">
-                <i class="ti ti-bell-ringing" aria-hidden="true"></i> Recordatorios en mi calendario
-              </button>
-            </div>
-            <p v-if="avisoCalendario" role="status" class="mt-2 font-bold text-warn-fg">{{ avisoCalendario }}</p>
+            <p v-if="!misPlanes.A" class="card mt-4">Todavía no encontramos un plan principal con tus respuestas.</p>
           </template>
           <p v-else class="card text-ink-soft">
             Los planes aparecen cuando los datos de la página se guardan en tu teléfono (unos segundos con señal).
@@ -299,35 +189,18 @@ function recordatorios() {
         </section>
 
         <h2 class="mb-3 text-xl">Carreras que te pueden interesar</h2>
-        <p v-if="!resultado.recomendaciones.length" class="card">
-          Con esas condiciones no encontramos opciones. Prueba con un presupuesto mayor o permitiendo mudarte.
-        </p>
+        <p v-if="!carreras.length" class="card">Todavía no encontramos carreras con tus respuestas.</p>
         <ul class="grid gap-4 sm:grid-cols-2">
-          <li v-for="r in resultado.recomendaciones" :key="`${r.carrera_id}`" class="card flex flex-col gap-2">
-            <h3 class="text-lg">{{ r.carrera }}</h3>
-            <p class="text-sm text-ink-soft">{{ r.universidad }} · {{ TIPOS[r.tipo] }} · {{ r.ciudad }}</p>
-            <p>{{ r.motivo }}</p>
-            <p v-if="r.costo_mensual_bs != null" class="text-sm"><strong>{{ bs(r.costo_mensual_bs) }}</strong> al mes (estimado)</p>
-            <div class="flex flex-wrap gap-2">
-              <StatusBadge :estado="r.estado_convocatoria" />
-              <span v-if="r.requiere_mudarse" class="inline-flex items-center rounded-full bg-warn-bg px-3 py-1 text-sm font-bold text-warn-fg">
-                ◆ Tendrías que mudarte
-              </span>
-            </div>
-            <RouterLink :to="`/facultades/${r.facultad_id}`" class="btn-ghost mt-auto">Ver convocatoria</RouterLink>
+          <li v-for="c in carreras" :key="c.id" class="card flex flex-col gap-2">
+            <h3 class="text-lg">{{ c.nombre }}</h3>
+            <p>{{ c.texto }}</p>
           </li>
         </ul>
 
         <p class="mt-6 text-sm text-ink-soft">{{ resultado.aviso }}</p>
 
         <div class="no-print mt-6 flex flex-wrap gap-3">
-          <a :href="enlaceWhatsApp" target="_blank" rel="noopener" class="btn-primary">
-            <i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Enviar por WhatsApp
-          </a>
-          <button type="button" class="btn-ghost" @click="imprimir">
-            <i class="ti ti-printer" aria-hidden="true"></i> Imprimir
-          </button>
-          <button type="button" class="btn-ghost" @click="paso = 'condiciones'">
+          <button type="button" class="btn-ghost" @click="paso = 'inicio'">
             <i class="ti ti-refresh" aria-hidden="true"></i> Repetir el test
           </button>
         </div>

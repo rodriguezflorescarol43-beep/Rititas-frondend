@@ -4,17 +4,18 @@ import { api } from '../api/servicios'
 import { useAsync } from '../composables/useAsync'
 import { ahorro } from '../composables/useAhorro'
 import AsyncState from '../components/AsyncState.vue'
-import { bs, MODALIDAD_PRE } from '../utils/format'
+import { DEPARTAMENTOS } from '../config'
+import { MODALIDAD_PRE } from '../utils/format'
 import { distanciaKm, formatoKm, ubicacionActual } from '../utils/geo'
 
 const props = defineProps({ tipo: { type: String, required: true } })
 
-const { datos: meta } = useAsync(() => api.meta())
+const { datos: meta } = useAsync(() => api.meta())  // nombres de las facultades
 const { datos: todos, error, cargando, ejecutar } = useAsync(() => api.preuniversitarios())
 
 const busqueda = ref('')
 const modalidad = ref('') // '' | presencial | virtual | cerca
-const departamento = ref('')
+const departamento = ref(DEPARTAMENTOS[0]) // la página solo cubre Cochabamba
 const ubicacion = ref(null)
 const buscandoUbicacion = ref(false)
 const errorUbicacion = ref('')
@@ -111,8 +112,7 @@ const lista = computed(() => {
       <label class="mb-5 block max-w-xs">
         <span class="mb-1 block text-sm font-bold text-ink-soft">Departamento</span>
         <select v-model="departamento" class="field">
-          <option value="">Todos</option>
-          <option v-for="d in meta?.departamentos ?? []" :key="d" :value="d">{{ d }}</option>
+          <option v-for="d in DEPARTAMENTOS" :key="d" :value="d">{{ d }}</option>
         </select>
       </label>
 
@@ -139,7 +139,6 @@ const lista = computed(() => {
               <span class="mt-1.5 flex flex-wrap gap-1.5 text-sm font-bold">
                 <span class="rounded-full bg-brand-soft px-3 py-0.5 text-brand">{{ p.modalidad === 'mixta' ? 'Presencial y virtual' : MODALIDAD_PRE[p.modalidad] }}</span>
                 <span v-if="claves(p).length" class="rounded-full bg-off-bg px-3 py-0.5 text-off-fg">{{ claves(p).length }} {{ claves(p).length === 1 ? 'facultad' : 'facultades' }}</span>
-                <span class="rounded-full bg-off-bg px-3 py-0.5 text-off-fg">{{ bs(p.costo_bs) }}</span>
               </span>
             </span>
             <i class="ti ti-chevron-right text-xl text-ink-soft" aria-hidden="true"></i>

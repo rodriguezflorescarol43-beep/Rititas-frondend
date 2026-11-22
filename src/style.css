@@ -65,10 +65,10 @@
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-3 font-bold transition active:scale-[0.98];
   }
   .btn-primary {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 font-bold text-white transition hover:bg-brand-dark active:scale-[0.98];
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand px-5 py-3 font-bold text-white transition hover:bg-brand-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
   }
   .btn-ghost {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 border-brand bg-transparent px-5 py-3 font-bold text-brand transition hover:bg-brand-soft active:scale-[0.98];
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 border-brand bg-transparent px-5 py-3 font-bold text-brand transition hover:bg-brand-soft active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
   }
   .card {
     @apply rounded-2xl border-2 border-line bg-card p-4;

@@ -1,6 +1,5 @@
 <script setup>
 import { TIPOS } from '../utils/format'
-import CostoPrimerAnio from './CostoPrimerAnio.vue'
 import StatusBadge from './StatusBadge.vue'
 
 defineProps({
@@ -26,12 +25,8 @@ defineProps({
 
     <div class="flex flex-wrap gap-2">
       <StatusBadge :estado="plan.estado_convocatoria" />
-      <span v-if="plan.requiere_mudarse" class="inline-flex items-center rounded-full bg-warn-bg px-3 py-1 text-sm font-bold text-warn-fg">◆ Tendrías que mudarte</span>
-      <span v-else class="inline-flex items-center rounded-full bg-ok-bg px-3 py-1 text-sm font-bold text-ok-fg">✔ Sin mudarte</span>
-      <span class="inline-flex items-center rounded-full bg-off-bg px-3 py-1 text-sm font-bold text-off-fg">{{ plan.duracion_anios ? `${plan.duracion_anios} años` : 'Duración por confirmar' }}</span>
+      <span v-if="plan.duracion_anios" class="inline-flex items-center rounded-full bg-off-bg px-3 py-1 text-sm font-bold text-off-fg">{{ plan.duracion_anios }} años</span>
     </div>
-
-    <CostoPrimerAnio :costo="plan.costo" />
 
     <details v-if="plan.razones?.length" class="rounded-xl border-2 border-line px-3 py-2">
       <summary class="cursor-pointer font-bold text-brand">¿Por qué esta carrera?</summary>

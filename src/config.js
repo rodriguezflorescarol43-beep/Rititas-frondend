@@ -9,4 +9,7 @@ export const MENU = [
   { to: '/orientacion', etiqueta: '¿No sabes qué estudiar?', corta: '¿Qué estudiar?', nota: '(test)', icono: 'ti-help-circle' },
 ]
 
+// Esta página es de prueba y solo cubre Cochabamba: los filtros por departamento ofrecen solo esta opción.
+export const DEPARTAMENTOS = ['Cochabamba']
+
 export const MENU_CONTACTO = { to: '/contacto', etiqueta: 'Contacto', icono: 'ti-mail' }

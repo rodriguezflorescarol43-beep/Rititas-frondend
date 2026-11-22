@@ -1,19 +1,10 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { api } from '../api/servicios'
-import { useAsync } from '../composables/useAsync'
 import { ahorro, ahorroAutomatico, ahorroManual, fijarAhorro } from '../composables/useAhorro'
 import PageHeader from '../components/PageHeader.vue'
-import {
-  actualizarPaquete,
-  archivoParaCompartir,
-  estadoPaquete,
-  importarArchivo,
-  paqueteActual,
-} from '../datos/paquete'
+import { actualizarPaquete, estadoPaquete, paqueteActual } from '../datos/paquete'
+import { DEPARTAMENTOS } from '../config'
 import { fecha } from '../utils/format'
-
-const { datos: meta } = useAsync(() => api.meta())
 
 // ---------- estado de los datos ----------
 const version = computed(() => estadoPaquete.version)
@@ -50,13 +41,14 @@ onMounted(async () => {
 const listo = computed(() => paginaInstalada.value && !!paqueteActual())
 
 // ---------- guardar las imágenes de mi departamento ----------
-const departamento = ref('')
+const departamento = ref(DEPARTAMENTOS[0])
 const imagenes = ref({ estado: 'reposo', total: 0 })
 async function guardarImagenes() {
   const datos = paqueteActual()?.datosObj
   if (!datos) return
   const urls = new Set()
   for (const u of datos.universidades) if (u.imagen_url && (!departamento.value || u.departamento === departamento.value)) urls.add(u.imagen_url)
+  for (const f of datos.facultades) if (f.convocatoria_imagen_url) urls.add(f.convocatoria_imagen_url)
   for (const p of datos.preuniversitarios) if (p.imagen_url && (!departamento.value || p.departamento === departamento.value)) urls.add(p.imagen_url)
   if (datos.ajustes.portada_imagen) urls.add(datos.ajustes.portada_imagen)
   imagenes.value = { estado: 'guardando', total: urls.size }
@@ -66,54 +58,6 @@ async function guardarImagenes() {
     img.src = url
   })))
   imagenes.value = { estado: 'listo', total: urls.size }
-}
-
-// ---------- compartir y recibir el paquete (por ejemplo, por WhatsApp) ----------
-const compartido = ref('')
-async function compartir() {
-  compartido.value = ''
-  const f = archivoParaCompartir()
-  if (!f) {
-    compartido.value = 'Todavía no hay datos guardados para compartir. Conéctate un momento y vuelve a intentarlo.'
-    return
-  }
-  try {
-    if (navigator.canShare?.({ files: [f.archivo] })) {
-      await navigator.share({ files: [f.archivo], title: 'Datos de la guía de ingreso', text: 'Abre este archivo en la página, en «Usar sin señal».' })
-      return
-    }
-  } catch (e) {
-    if (e.name === 'AbortError') return
-  }
-  const url = URL.createObjectURL(f.archivo)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = f.nombre
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
-  compartido.value = `Se guardó el archivo «${f.nombre}». Envíalo por WhatsApp a quien lo necesite.`
-}
-
-const recibido = ref('')
-const errorRecibido = ref('')
-async function recibir(evento) {
-  recibido.value = ''
-  errorRecibido.value = ''
-  const archivo = evento.target.files?.[0]
-  evento.target.value = ''
-  if (!archivo) return
-  if (archivo.size > 5 * 1024 * 1024) {
-    errorRecibido.value = 'El archivo es demasiado grande para ser un paquete de datos.'
-    return
-  }
-  try {
-    const nueva = await importarArchivo(await archivo.text())
-    recibido.value = `Listo: tus datos ahora son del ${fecha(nueva.slice(0, 10))}. El sello es válido.`
-  } catch (e) {
-    errorRecibido.value = e.message
-  }
 }
 
 const OPCIONES_AHORRO = [
@@ -168,8 +112,7 @@ const OPCIONES_AHORRO = [
         <label class="mt-2 block max-w-xs">
           <span class="sr-only">Departamento</span>
           <select v-model="departamento" class="field">
-            <option value="">Todos los departamentos</option>
-            <option v-for="d in meta?.departamentos ?? []" :key="d" :value="d">{{ d }}</option>
+            <option v-for="d in DEPARTAMENTOS" :key="d" :value="d">{{ d }}</option>
           </select>
         </label>
         <button type="button" class="btn-ghost mt-2" @click="guardarImagenes">
@@ -180,36 +123,6 @@ const OPCIONES_AHORRO = [
           {{ imagenes.total ? `Se guardaron ${imagenes.total} fotos.` : 'No hay fotos para guardar todavía.' }}
         </p>
       </div>
-    </section>
-
-    <section class="card space-y-3 lg:col-span-2" aria-labelledby="s-compartir">
-      <h2 id="s-compartir" class="text-lg">Pasar los datos por WhatsApp</h2>
-      <p class="max-w-3xl text-ink-soft">
-        Si alguien tiene señal y tú casi no, puede enviarte un archivo con todos los datos actualizados. El archivo lleva
-        un <strong>sello digital</strong>: si alguien cambia una sola fecha o costo, la página lo rechaza.
-      </p>
-      <div class="grid gap-5 sm:grid-cols-2">
-        <div class="space-y-2">
-          <h3 class="text-base">Compartir mis datos</h3>
-          <button type="button" class="btn-primary" @click="compartir">
-            <i class="ti ti-share" aria-hidden="true"></i> Enviar mis datos
-          </button>
-          <p v-if="compartido" role="status" class="text-sm font-bold">{{ compartido }}</p>
-        </div>
-        <div class="space-y-2">
-          <h3 class="text-base">Recibir datos de un archivo</h3>
-          <label class="btn-ghost cursor-pointer has-[:focus-visible]:outline has-[:focus-visible]:outline-2">
-            <i class="ti ti-upload" aria-hidden="true"></i> Elegir el archivo recibido
-            <input type="file" accept=".json,application/json" class="sr-only" @change="recibir" />
-          </label>
-          <p v-if="recibido" role="status" class="font-bold text-ok-fg">{{ recibido }}</p>
-          <p v-if="errorRecibido" role="alert" class="font-bold text-bad-fg">{{ errorRecibido }}</p>
-        </div>
-      </div>
-      <p class="text-sm text-ink-soft">
-        WhatsApp necesita algo de conexión para entregar el archivo, pero pesa muy poco. Solo se aceptan datos más
-        nuevos que los que ya tienes.
-      </p>
     </section>
   </div>
 </template>

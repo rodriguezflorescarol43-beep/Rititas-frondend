@@ -32,7 +32,8 @@ const rutas = [
       { path: 'portada', component: () => import('./views/admin/AdminPortada.vue'), meta: { titulo: 'Portada' } },
       { path: 'mensajes', component: () => import('./views/admin/AdminMensajes.vue'), meta: { titulo: 'Mensajes' } },
       { path: 'revision', component: () => import('./views/admin/AdminRevision.vue'), meta: { titulo: 'Qué revisar hoy' } },
-      { path: 'importar', component: () => import('./views/admin/AdminImportar.vue'), meta: { titulo: 'Importar propuesta' } },
+      { path: 'importar', component: () => import('./views/admin/AdminImportar.vue'), meta: { titulo: 'Importar con IA' } },
+      { path: 'medir', component: () => import('./views/admin/AdminMedir.vue'), meta: { titulo: 'Medir la IA' } },
       {
         path: ':recurso',
         name: 'admin-recurso',

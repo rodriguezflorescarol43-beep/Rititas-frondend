@@ -19,6 +19,7 @@ function resumenFacultad(f, hoy) {
     tipo: uni.tipo, ciudad: uni.ciudad, departamento: uni.departamento,
     n_carreras: P().carreras.filter((c) => c.facultad_id === f.id).length,
     estado_convocatoria: estadoResumen(convocatoriasDe(f.id, hoy)),
+    convocatoria_imagen_url: f.convocatoria_imagen_url ?? null,
   }
 }
 

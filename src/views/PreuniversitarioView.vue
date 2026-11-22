@@ -28,7 +28,7 @@ const tipos = computed(() =>
   <PageHeader
     titulo="Preuniversitario"
     nota="(institutos)"
-    subtitulo="Elige la facultad a la que quieres postularte y mira quién te prepara, cuánto cuesta y cómo llegar."
+    subtitulo="Elige la facultad a la que quieres postularte y mira quién te prepara y cómo llegar."
   />
 
   <AsyncState :cargando="cargando" :error="error" @reintentar="ejecutar">

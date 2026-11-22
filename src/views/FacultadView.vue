@@ -2,6 +2,7 @@
 import { watch } from 'vue'
 import { api } from '../api/servicios'
 import { useAsync } from '../composables/useAsync'
+import { ahorro } from '../composables/useAhorro'
 import AsyncState from '../components/AsyncState.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import VerifiedTag from '../components/VerifiedTag.vue'
@@ -25,8 +26,24 @@ watch(() => props.id, () => ejecutar())
         <h1 class="mt-1 text-2xl sm:text-3xl">{{ f.nombre }}</h1>
       </header>
 
-      <h2 class="mb-3 text-xl">Convocatoria</h2>
-      <p v-if="!f.convocatorias.length" class="card text-ink-soft">
+      <h2 class="mb-3 text-xl">Carreras</h2>
+      <ul class="grid gap-3 sm:grid-cols-2">
+        <li v-for="c in f.carreras" :key="c.id" class="card">
+          <p class="font-bold">{{ c.nombre }}</p>
+          <p v-if="c.duracion_anios" class="text-sm text-ink-soft">{{ c.duracion_anios }} años</p>
+          <p v-if="c.descripcion" class="mt-1">{{ c.descripcion }}</p>
+        </li>
+      </ul>
+
+      <h2 class="mb-3 mt-8 text-xl">Convocatoria</h2>
+      <!-- Afiche o foto de la convocatoria (la sube el administrador). Con el ahorro de datos no se descarga sola. -->
+      <figure v-if="f.convocatoria_imagen_url" class="mb-4">
+        <img v-if="!ahorro" :src="f.convocatoria_imagen_url" :alt="`Convocatoria de ${f.nombre}`" class="w-full max-w-2xl rounded-2xl border-2 border-line" loading="lazy" />
+        <a v-else :href="f.convocatoria_imagen_url" target="_blank" rel="noopener" class="btn-ghost">
+          <i class="ti ti-photo" aria-hidden="true"></i> Ver la imagen de la convocatoria
+        </a>
+      </figure>
+      <p v-if="!f.convocatorias.length && !f.convocatoria_imagen_url" class="card text-ink-soft">
         Esta facultad todavía no tiene una convocatoria cargada. Consulta el sitio de la universidad.
       </p>
       <article v-for="c in f.convocatorias" :key="c.id" class="card mb-4 space-y-3">
@@ -54,23 +71,6 @@ watch(() => props.id, () => ejecutar())
         <VerifiedTag :verificado="c.verificado_en" :fuente="c.fuente_url" />
       </article>
 
-      <h2 class="mb-3 mt-8 text-xl">Carreras</h2>
-      <ul class="grid gap-3 sm:grid-cols-2">
-        <li v-for="c in f.carreras" :key="c.id" class="card">
-          <p class="font-bold">{{ c.nombre }}</p>
-          <p class="text-sm text-ink-soft">{{ c.duracion_anios ? `${c.duracion_anios} años` : 'Duración por confirmar' }}</p>
-          <p v-if="c.descripcion" class="mt-1">{{ c.descripcion }}</p>
-        </li>
-      </ul>
-
-      <h2 class="mb-3 mt-8 text-xl">La universidad</h2>
-      <div class="card space-y-1">
-        <p class="font-bold">{{ f.universidad.nombre }}</p>
-        <p>Costo mensual: <strong>{{ f.universidad.costo_mensual_bs == null ? 'por confirmar' : bs(f.universidad.costo_mensual_bs) }}</strong></p>
-        <p v-if="f.universidad.becas">Becas: {{ f.universidad.becas }}</p>
-        <a v-if="f.universidad.sitio_web" :href="f.universidad.sitio_web" target="_blank" rel="noopener" class="font-bold text-brand underline">Sitio web oficial</a>
-        <VerifiedTag :verificado="f.universidad.verificado_en" :fuente="f.universidad.fuente_url" />
-      </div>
     </template>
   </AsyncState>
 </template>

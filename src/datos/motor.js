@@ -140,6 +140,19 @@ const TIPOS_POR_AREA = {
   naturaleza: ['ciencias_tecnologia', 'bioquimica'],
 }
 
+const sinAcentos = (t) => String(t ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+
+// Qué tipo de facultad (Medicina, Ciencias Económicas…) corresponde a la prioridad de la persona:
+// primero por el nombre de la facultad del Plan A; si no coincide, por el área que más le gustó.
+function tipoDeFacultad(paquete, nombreFacultad, areaBase) {
+  const nombre = sinAcentos(nombreFacultad)
+  const tipos = Object.entries(paquete.facultades_tipo ?? {})
+  const clave = (t) => sinAcentos(t.nombre).replace(/^ciencias\s+(y\s+)?/, '').split(/\s+y\s+/)[0]
+  const porNombre = tipos.find(([, t]) => nombre.includes(sinAcentos(t.nombre)) || (clave(t).length > 4 && nombre.includes(clave(t))))
+  if (porNombre) return porNombre[0]
+  return (TIPOS_POR_AREA[areaBase] ?? []).find((c) => paquete.facultades_tipo?.[c]) ?? null
+}
+
 function convocatoriaRelevante(lista) {
   const orden = { proxima: 0, abierta: 1, cerrada: 2 }
   return [...lista].sort((a, b) => orden[a.estado] - orden[b.estado] || a.inscripcion_inicio.localeCompare(b.inscripcion_inicio))[0] ?? null
@@ -223,7 +236,10 @@ export function planes(paquete, resultado, cond = {}, hoy = hoyISO()) {
     const preu = candidatos[0]?.p ?? null
     const conv = A?.convocatoria ?? null
     const uniA = A ? universidades.get(facultades.get(A.facultad_id).universidad_id) : null
+    const tipoC = tipoDeFacultad(paquete, A ? facultades.get(A.facultad_id)?.nombre : null, areaBase)
     C = {
+      facultad_tipo: tipoC,
+      facultad_tipo_nombre: tipoC ? paquete.facultades_tipo[tipoC].nombre : null,
       preuniversitario: preu,
       convocatoria: conv,
       proxima: conv && conv.estado !== 'cerrada' ? conv : null,

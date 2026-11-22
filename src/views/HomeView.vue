@@ -4,9 +4,6 @@ import { api } from '../api/servicios'
 import { useAsync } from '../composables/useAsync'
 import { ahorro } from '../composables/useAhorro'
 
-const { datos: abiertas } = useAsync(() => api.convocatorias({ estado: 'abierta' }))
-const cantidad = computed(() => abiertas.value?.length ?? null)
-
 // Título, texto, imagen y video de la portada se editan desde el panel de administración.
 const { datos: ajustes } = useAsync(() => api.ajustes())
 const portada = computed(() => ({
@@ -19,9 +16,9 @@ const portada = computed(() => ({
 // La ruta recorre el orden natural: descubrir → comparar → prepararse → inscribirse.
 const PASOS = [
   { to: '/orientacion', icono: 'ti-compass', titulo: 'Descubre qué estudiar', texto: 'Un test corto y carreras que encajan contigo.', tono: 'bg-mint-soft text-night' },
-  { to: '/universidades', icono: 'ti-building-community', titulo: 'Compara universidades', texto: 'Públicas, privadas y técnicas, con costos y becas.', tono: 'bg-brand-soft text-brand' },
-  { to: '/preuniversitario', nota: '(institutos)', icono: 'ti-school', titulo: 'Prepárate', texto: 'Dónde estudiar antes del examen y cuánto cuesta.', tono: 'bg-night text-mint' },
-  { to: '/universidades', icono: 'ti-calendar-event', titulo: 'Inscríbete a tiempo', texto: 'Entra a tu universidad y facultad para ver fechas y requisitos.', tono: 'bg-brand text-white' },
+  { to: '/universidades', icono: 'ti-building-community', titulo: 'Universidades', texto: 'Públicas y privadas.', tono: 'bg-brand-soft text-brand' },
+  { to: '/preuniversitario', nota: '(institutos)', icono: 'ti-school', titulo: 'Prepárate', texto: 'Dónde estudiar antes del examen.', tono: 'bg-night text-mint' },
+  { to: '/universidades', icono: 'ti-calendar-event', titulo: 'Inscríbete a tiempo', texto: 'Convocatorias.', tono: 'bg-brand text-white' },
 ]
 </script>
 
@@ -56,23 +53,9 @@ const PASOS = [
     <video :src="portada.video" class="w-full rounded-2xl bg-ink" controls preload="none"></video>
   </section>
 
-  <RouterLink
-    v-if="cantidad !== null"
-    to="/universidades"
-    class="card aparece sube mt-5 flex items-center gap-3 hover:border-brand"
-    style="--i: 2"
-  >
-    <span class="rounded-full bg-ok-bg px-3 py-1 font-bold text-ok-fg" aria-hidden="true">✔</span>
-    <span>
-      <strong>{{ cantidad }}</strong>
-      {{ cantidad === 1 ? 'convocatoria abierta' : 'convocatorias abiertas' }} ahora.
-      <span class="font-bold text-brand underline">Ver cuáles</span>
-    </span>
-  </RouterLink>
-
   <h2 class="mb-4 mt-10 text-2xl">Tu ruta, paso a paso</h2>
   <ol class="grid gap-4 sm:grid-cols-4">
-    <li v-for="(p, i) in PASOS" :key="p.to" class="aparece" :style="{ '--i': i + 3 }">
+    <li v-for="(p, i) in PASOS" :key="p.titulo" class="aparece" :style="{ '--i': i + 3 }">
       <div class="flex items-center">
         <span class="grid size-12 shrink-0 place-items-center rounded-2xl text-2xl" :class="p.tono">
           <i class="ti" :class="p.icono" aria-hidden="true"></i>
@@ -90,19 +73,12 @@ const PASOS = [
     </li>
   </ol>
 
-  <div class="mt-8 grid gap-4 sm:grid-cols-2">
+  <div class="mt-8">
     <RouterLink to="/sin-senal" class="card sube aparece flex items-start gap-3 hover:border-brand" style="--i: 7">
       <span class="grid size-12 shrink-0 place-items-center rounded-2xl bg-night text-2xl text-mint"><i class="ti ti-wifi-2" aria-hidden="true"></i></span>
       <span>
         <span class="block text-lg font-bold">Pensada para señal débil</span>
         <span class="text-ink-soft">Se guarda en tu teléfono, carga rápido y sigue funcionando sin señal. Mira cómo.</span>
-      </span>
-    </RouterLink>
-    <RouterLink to="/embajadores" class="card sube aparece flex items-start gap-3 hover:border-brand" style="--i: 8">
-      <span class="grid size-12 shrink-0 place-items-center rounded-2xl bg-mint-soft text-2xl text-night"><i class="ti ti-users" aria-hidden="true"></i></span>
-      <span>
-        <span class="block text-lg font-bold">Habla con alguien que ya estudia</span>
-        <span class="text-ink-soft">Estudiantes voluntarios te cuentan cómo es el examen y la vida en su universidad.</span>
       </span>
     </RouterLink>
   </div>

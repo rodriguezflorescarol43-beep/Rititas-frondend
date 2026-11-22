@@ -42,4 +42,6 @@ export const adminApi = {
   analizarPropuesta: (propuesta) => admin('/propuestas/analizar', { metodo: 'POST', cuerpo: propuesta }),
   aplicarPropuesta: (propuesta, aprobados) =>
     admin('/propuestas/aplicar', { metodo: 'POST', cuerpo: { propuesta, aprobados } }),
+  medirIa: (datos) => admin('/mediciones', { metodo: 'POST', cuerpo: datos }),
+  mediciones: () => admin('/mediciones'),
 }
