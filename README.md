@@ -1,6 +1,6 @@
-# Guía de ingreso · Frontend (PWA)
+# Despega · Frontend (PWA)
 
-**Abstracthon 2026.** Página web para quienes terminan el colegio en zonas alejadas (provincias) y no saben **qué
+**Abstracthon 2026.** «Despega» (guía de ingreso a la universidad) es una página web para quienes terminan el colegio en zonas alejadas (provincias) y no saben **qué
 estudiar**, **qué preuniversitarios existen** ni **cuándo son las convocatorias**. Pensada para **señal débil**, sin
 registro y que funciona **sin señal**.
 

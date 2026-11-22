@@ -1,5 +1,7 @@
 // Cambia aquí el nombre del proyecto y el menú: se usa en toda la app.
-export const NOMBRE = 'Guía de ingreso'
+export const NOMBRE = 'Despega'
+// Lo que la página es, en pocas palabras (se ve junto al nombre y en el título de la pestaña).
+export const SUBTITULO = 'Guía de ingreso'
 
 export const MENU = [
   // `nota` es la palabra pequeña que explica la sección (se ve en el menú del celular y en el de escritorio).

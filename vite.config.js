@@ -24,8 +24,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg'],
       manifest: {
-        name: 'Guía de ingreso',
-        short_name: 'Guía de ingreso',
+        name: 'Despega · Guía de ingreso',
+        short_name: 'Despega',
         description:
           'Convocatorias, preuniversitarios (institutos), universidades y orientación para elegir qué estudiar.',
         lang: 'es',

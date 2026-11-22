@@ -10,7 +10,7 @@ function sumarDia(iso) {
 const escapar = (t) => String(t).replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n')
 
 export function crearIcs(eventos) {
-  const lineas = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Guia de ingreso//ES', 'CALSCALE:GREGORIAN']
+  const lineas = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Despega//ES', 'CALSCALE:GREGORIAN']
   eventos.forEach((e, i) => {
     lineas.push(
       'BEGIN:VEVENT',

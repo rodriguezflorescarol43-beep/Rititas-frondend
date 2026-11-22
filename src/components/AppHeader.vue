@@ -1,5 +1,5 @@
 <script setup>
-import { MENU, MENU_CONTACTO, NOMBRE } from '../config'
+import { MENU, MENU_CONTACTO, NOMBRE, SUBTITULO } from '../config'
 </script>
 
 <template>
@@ -12,7 +12,10 @@ import { MENU, MENU_CONTACTO, NOMBRE } from '../config'
           <circle cx="17" cy="9" r="4.5" fill="#1B6B4C" />
           <circle cx="26" cy="24" r="4.5" fill="#5BC78F" />
         </svg>
-        {{ NOMBRE }}
+        <span class="leading-tight">
+          {{ NOMBRE }}
+          <small class="block text-xs font-normal text-ink-soft">{{ SUBTITULO }}</small>
+        </span>
       </RouterLink>
 
       <nav aria-label="Menú principal" class="hidden items-center gap-1 md:flex">
