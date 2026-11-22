@@ -21,7 +21,7 @@ const PASOS = [
   { to: '/orientacion', icono: 'ti-compass', titulo: 'Descubre qué estudiar', texto: 'Un test corto y carreras que encajan contigo.', tono: 'bg-mint-soft text-night' },
   { to: '/universidades', icono: 'ti-building-community', titulo: 'Compara universidades', texto: 'Públicas, privadas y técnicas, con costos y becas.', tono: 'bg-brand-soft text-brand' },
   { to: '/preuniversitario', nota: '(institutos)', icono: 'ti-school', titulo: 'Prepárate', texto: 'Dónde estudiar antes del examen y cuánto cuesta.', tono: 'bg-night text-mint' },
-  { to: '/convocatorias', icono: 'ti-calendar-event', titulo: 'Inscríbete a tiempo', texto: 'Fechas y requisitos de cada facultad.', tono: 'bg-brand text-white' },
+  { to: '/universidades', icono: 'ti-calendar-event', titulo: 'Inscríbete a tiempo', texto: 'Entra a tu universidad y facultad para ver fechas y requisitos.', tono: 'bg-brand text-white' },
 ]
 </script>
 
@@ -58,7 +58,7 @@ const PASOS = [
 
   <RouterLink
     v-if="cantidad !== null"
-    to="/convocatorias"
+    to="/universidades"
     class="card aparece sube mt-5 flex items-center gap-3 hover:border-brand"
     style="--i: 2"
   >

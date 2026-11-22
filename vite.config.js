@@ -43,6 +43,9 @@ export default defineConfig({
       workbox: {
         // Sin .woff: todos los navegadores actuales usan woff2, y el .woff solo ocupaba espacio.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,webmanifest}'],
+        // El panel de administración se usa con conexión: no se guarda de antemano en el teléfono del
+        // estudiante. Así la preparación termina antes (menos archivos que bajar con señal débil).
+        globIgnores: ['**/Admin*.js', '**/admin-*.js'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,

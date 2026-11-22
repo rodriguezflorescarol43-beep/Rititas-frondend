@@ -5,7 +5,7 @@ import { MENU } from '../config'
 <template>
   <nav
     aria-label="Menú principal"
-    class="no-print fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t-2 border-line bg-card md:hidden"
+    class="no-print fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t-2 border-line bg-card md:hidden"
   >
     <RouterLink
       v-for="item in MENU"

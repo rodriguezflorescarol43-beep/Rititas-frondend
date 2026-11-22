@@ -20,15 +20,15 @@ o intermitente.
 
 **Solución.** Una guía web instalable (PWA) que reúne todo en un solo lugar y funciona con poca señal.
 
-**Menú:** Inicio · Convocatorias · Preuniversitario (institutos) · Universidades · ¿No sabes qué estudiar? · Contacto.
+**Menú:** Inicio · Preuniversitario (institutos) · Universidades · ¿No sabes qué estudiar? · Contacto.
+Las convocatorias están **dentro de cada universidad**: Universidades → una universidad → una facultad.
 
 ## Qué hace
 
 | Sección | Contenido |
 |---|---|
-| **Convocatorias** | Facultades por universidad. Al entrar a una facultad se abre su convocatoria: fechas, requisitos, costo, carreras y botón para guardar las fechas en el calendario (con alarma un día antes) |
 | **Preuniversitario (institutos)** | Elegir la **facultad** → lista con filtros (Presencial, Virtual, **Cerca de mí**) → detalle con zona, materias, «Cómo llegar», WhatsApp y redes |
-| **Universidades** | Públicas, privadas y técnicas, con costo estimado, becas y enlace a sus facultades |
+| **Universidades y convocatorias** | Públicas, privadas y técnicas, con costo estimado y becas. Al entrar a una universidad se ven sus **facultades**; al entrar a una facultad se abre su **convocatoria**: fechas, requisitos, costo, carreras y botón para guardar las fechas en el calendario (con alarma un día antes) |
 | **¿No sabes qué estudiar?** | Condiciones → test de 8 preguntas → carreras recomendadas **con el motivo explicado**, **Plan A, B y C**, costo estimado del primer año y simulador «¿y si…?» |
 | **Embajadores** | Estudiantes voluntarios (mayores de 18 años, con consentimiento) que cuentan cómo es su universidad |
 | **Usar sin señal** | Estado de los datos guardados, modo ahorro, y **pasar los datos por WhatsApp** con sello digital |
@@ -136,7 +136,7 @@ de cada dato nunca depende solo del color: lleva forma y texto. La animación se
 
 ## Panel de administración
 
-La ruta `/admin` (no aparece en el menú) trae el panel: editar datos, imágenes y videos, portada, **Qué revisar hoy**
+La ruta `/admin` (no aparece en el menú) trae el panel: editar universidades, facultades, carreras, convocatorias y preuniversitarios, imágenes y videos, portada, **Qué revisar hoy**
 (el Detective) e **Importar propuesta** (datos sugeridos por IA con cita de la fuente, que una persona revisa y
 aprueba). La contraseña y la lógica están en el backend.
 

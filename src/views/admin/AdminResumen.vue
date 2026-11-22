@@ -12,7 +12,6 @@ const TARJETAS = [
   ['carreras', 'Carreras', 'ti-certificate'],
   ['convocatorias', 'Convocatorias', 'ti-calendar-event'],
   ['preuniversitarios', 'Preuniversitarios', 'ti-school'],
-  ['embajadores', 'Embajadores', 'ti-users'],
   ['medios', 'Imágenes y videos', 'ti-photo-video'],
   ['mensajes', 'Mensajes', 'ti-mail'],
 ]

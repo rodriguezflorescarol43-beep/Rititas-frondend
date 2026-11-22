@@ -2,11 +2,11 @@
 export const NOMBRE = 'Guía de ingreso'
 
 export const MENU = [
-  { to: '/', etiqueta: 'Inicio', icono: 'ti-home', exacto: true },
-  { to: '/convocatorias', etiqueta: 'Convocatorias', icono: 'ti-calendar-event' },
+  // `nota` es la palabra pequeña que explica la sección (se ve en el menú del celular y en el de escritorio).
+  { to: '/', etiqueta: 'Inicio', nota: '(empezar)', icono: 'ti-home', exacto: true },
   { to: '/preuniversitario', etiqueta: 'Preuniversitario', corta: 'Preuniv.', nota: '(institutos)', icono: 'ti-school' },
-  { to: '/universidades', etiqueta: 'Universidades', icono: 'ti-building-community' },
-  { to: '/orientacion', etiqueta: '¿No sabes qué estudiar?', icono: 'ti-help-circle' },
+  { to: '/universidades', etiqueta: 'Universidades', nota: '(convocatorias)', icono: 'ti-building-community' },
+  { to: '/orientacion', etiqueta: '¿No sabes qué estudiar?', corta: '¿Qué estudiar?', nota: '(test)', icono: 'ti-help-circle' },
 ]
 
 export const MENU_CONTACTO = { to: '/contacto', etiqueta: 'Contacto', icono: 'ti-mail' }

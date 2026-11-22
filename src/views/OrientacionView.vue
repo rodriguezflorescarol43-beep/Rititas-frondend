@@ -314,7 +314,7 @@ function recordatorios() {
                 ◆ Tendrías que mudarte
               </span>
             </div>
-            <RouterLink :to="`/convocatorias/${r.facultad_id}`" class="btn-ghost mt-auto">Ver convocatoria</RouterLink>
+            <RouterLink :to="`/facultades/${r.facultad_id}`" class="btn-ghost mt-auto">Ver convocatoria</RouterLink>
           </li>
         </ul>
 

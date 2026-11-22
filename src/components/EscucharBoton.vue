@@ -84,9 +84,11 @@ onBeforeUnmount(() => soportado && detener())
 </script>
 
 <template>
-  <div v-if="soportado" class="no-print mb-3 flex flex-wrap items-center justify-end gap-2" role="region" aria-label="Escuchar esta página">
-    <button v-if="estado === 'reposo'" type="button" class="btn-ghost !min-h-10 !px-4 !py-1.5 text-sm" @click="leer">
-      <i class="ti ti-volume" aria-hidden="true"></i> Escuchar esta página
+  <div v-if="soportado" class="no-print flex flex-wrap items-center justify-end gap-2" role="region" aria-label="Escuchar esta página">
+    <button v-if="estado === 'reposo'" type="button" class="btn-ghost !min-h-10 !px-3 !py-1 text-sm sm:!px-4" aria-label="Escuchar esta página" @click="leer">
+      <i class="ti ti-volume" aria-hidden="true"></i>
+      <span class="sm:hidden" aria-hidden="true">Escuchar</span>
+      <span class="hidden sm:inline" aria-hidden="true">Escuchar esta página</span>
     </button>
     <template v-else>
       <button v-if="estado === 'leyendo'" type="button" class="btn-ghost !min-h-10 !px-4 !py-1.5 text-sm" @click="pausar">

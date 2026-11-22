@@ -5,8 +5,12 @@ import { NOMBRE } from './config'
 
 const rutas = [
   { path: '/', name: 'inicio', component: () => import('./views/HomeView.vue'), meta: { titulo: 'Inicio' } },
-  { path: '/convocatorias', name: 'convocatorias', component: () => import('./views/ConvocatoriasView.vue'), meta: { titulo: 'Convocatorias' } },
-  { path: '/convocatorias/:id', name: 'facultad', component: () => import('./views/FacultadView.vue'), props: true, meta: { titulo: 'Convocatoria' } },
+  // Las convocatorias viven dentro de la universidad: Universidades > una universidad > una facultad.
+  { path: '/universidades/:id(\\d+)', name: 'universidad', component: () => import('./views/UniversidadView.vue'), props: true, meta: { titulo: 'Universidad' } },
+  { path: '/facultades/:id(\\d+)', name: 'facultad', component: () => import('./views/FacultadView.vue'), props: true, meta: { titulo: 'Facultad y convocatoria' } },
+  // Direcciones viejas (enlaces guardados): llevan a la nueva ubicación.
+  { path: '/convocatorias', redirect: '/universidades' },
+  { path: '/convocatorias/:id(\\d+)', redirect: (to) => `/facultades/${to.params.id}` },
   { path: '/preuniversitario', name: 'preuniversitario', component: () => import('./views/PreuniversitarioView.vue'), meta: { titulo: 'Preuniversitario (institutos)' } },
   { path: '/preuniversitario/facultad/:tipo', name: 'preu-lista', component: () => import('./views/PreuniversitarioLista.vue'), props: true, meta: { titulo: 'Preuniversitarios' } },
   { path: '/preuniversitario/:id(\\d+)', name: 'preu-detalle', component: () => import('./views/PreuniversitarioDetalle.vue'), props: true, meta: { titulo: 'Preuniversitario' } },

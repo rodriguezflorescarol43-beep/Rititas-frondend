@@ -58,7 +58,7 @@ watch([tipo, departamento], () => ejecutar())
         <p v-if="u.becas"><i class="ti ti-award text-brand" aria-hidden="true"></i> {{ u.becas }}</p>
         <a v-if="u.sitio_web" :href="u.sitio_web" target="_blank" rel="noopener" class="font-bold text-brand underline">Sitio web oficial</a>
         <VerifiedTag :verificado="u.verificado_en" :fuente="u.fuente_url" />
-        <RouterLink :to="{ path: '/convocatorias', query: { uni: u.id } }" class="btn-ghost mt-auto">
+        <RouterLink :to="`/universidades/${u.id}`" class="btn-ghost mt-auto">
           Ver facultades y convocatorias
         </RouterLink>
       </li>

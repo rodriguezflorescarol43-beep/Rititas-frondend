@@ -41,6 +41,6 @@ defineProps({
       </ul>
     </details>
 
-    <RouterLink :to="`/convocatorias/${plan.facultad_id}`" class="btn-ghost mt-auto">Ver convocatoria</RouterLink>
+    <RouterLink :to="`/facultades/${plan.facultad_id}`" class="btn-ghost mt-auto">Ver convocatoria</RouterLink>
   </article>
 </template>

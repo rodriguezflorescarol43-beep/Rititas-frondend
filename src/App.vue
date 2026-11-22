@@ -4,6 +4,7 @@ import AppHeader from './components/AppHeader.vue'
 import BottomNav from './components/BottomNav.vue'
 import EscucharBoton from './components/EscucharBoton.vue'
 import EstadoDatos from './components/EstadoDatos.vue'
+import ListoSinSenal from './components/ListoSinSenal.vue'
 import OfflineBanner from './components/OfflineBanner.vue'
 
 const route = useRoute()
@@ -22,6 +23,7 @@ const route = useRoute()
     </a>
     <AppHeader />
     <OfflineBanner />
+    <ListoSinSenal />
     <div class="mx-auto max-w-5xl px-4 pt-3"><EscucharBoton /></div>
     <main id="contenido" class="mx-auto max-w-5xl px-4 pb-28 pt-3 md:pb-12">
       <RouterView />

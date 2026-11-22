@@ -13,6 +13,6 @@ defineProps({
       {{ titulo }}
       <small v-if="nota" class="block text-base font-normal text-ink-soft sm:inline sm:text-lg">{{ nota }}</small>
     </h1>
-    <p v-if="subtitulo" class="mt-2 max-w-2xl text-lg text-ink-soft">{{ subtitulo }}</p>
+    <p v-if="subtitulo" class="mt-2 max-w-2xl text-base text-ink-soft sm:text-lg">{{ subtitulo }}</p>
   </header>
 </template>

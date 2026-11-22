@@ -144,28 +144,6 @@ export const RECURSOS = {
     ],
     dependencias: ['medios'],
   },
-  embajadores: {
-    titulo: 'Embajadores',
-    singular: 'embajador',
-    columnas: [
-      { clave: 'nombre', etiqueta: 'Nombre' },
-      { clave: 'universidad_id', etiqueta: 'Universidad', desde: 'universidades' },
-      { clave: 'carrera', etiqueta: 'Carrera' },
-      { clave: 'activo', etiqueta: 'Publicado', bool: true },
-    ],
-    campos: [
-      { clave: 'universidad_id', etiqueta: 'Universidad', tipo: 'select', requerido: true, desde: 'universidades' },
-      { clave: 'nombre', etiqueta: 'Nombre', tipo: 'texto', requerido: true },
-      { clave: 'carrera', etiqueta: 'Carrera que estudia', tipo: 'texto', requerido: true },
-      { clave: 'mensaje', etiqueta: 'Mensaje para quien quiere entrar', tipo: 'textarea', nulo: true },
-      { clave: 'whatsapp', etiqueta: 'WhatsApp', tipo: 'texto', nulo: true, ayuda: 'Solo números con el código del país. Es el contacto que se mostrará.' },
-      { clave: 'mayor_de_edad', etiqueta: 'Es mayor de 18 años', tipo: 'bool' },
-      { clave: 'consentimiento', etiqueta: 'Aceptó aparecer en la página (consentimiento)', tipo: 'bool' },
-      { clave: 'consentimiento_fecha', etiqueta: 'Fecha del consentimiento', tipo: 'fecha', nulo: true },
-      { clave: 'activo', etiqueta: 'Publicar en la página', tipo: 'bool', ayuda: 'Solo se puede publicar con mayoría de edad, consentimiento y su fecha.' },
-    ],
-    dependencias: ['universidades'],
-  },
 }
 
 export const MENU_ADMIN = [
@@ -177,7 +155,6 @@ export const MENU_ADMIN = [
   { to: '/admin/carreras', etiqueta: 'Carreras', icono: 'ti-certificate' },
   { to: '/admin/convocatorias', etiqueta: 'Convocatorias', icono: 'ti-calendar-event' },
   { to: '/admin/preuniversitarios', etiqueta: 'Preuniversitarios', icono: 'ti-school' },
-  { to: '/admin/embajadores', etiqueta: 'Embajadores', icono: 'ti-users' },
   { to: '/admin/medios', etiqueta: 'Imágenes y videos', icono: 'ti-photo-video' },
   { to: '/admin/portada', etiqueta: 'Portada', icono: 'ti-home-edit' },
   { to: '/admin/mensajes', etiqueta: 'Mensajes', icono: 'ti-mail' },

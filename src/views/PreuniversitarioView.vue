@@ -63,7 +63,7 @@ const tipos = computed(() =>
       <p class="mt-1">
         Un preuniversitario es un curso para prepararte antes del examen de ingreso. Cada facultad decide cómo se
         ingresa: por examen, por preuniversitario o por ambos. Mira la modalidad en cada
-        <RouterLink to="/convocatorias" class="font-bold text-brand underline">convocatoria</RouterLink>.
+        <RouterLink to="/universidades" class="font-bold text-brand underline">convocatoria</RouterLink>.
       </p>
     </aside>
   </AsyncState>

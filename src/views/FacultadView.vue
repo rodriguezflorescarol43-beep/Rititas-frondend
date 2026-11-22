@@ -14,8 +14,8 @@ watch(() => props.id, () => ejecutar())
 </script>
 
 <template>
-  <RouterLink to="/convocatorias" class="mb-4 inline-flex min-h-11 items-center gap-1 font-bold text-brand underline">
-    <i class="ti ti-arrow-left" aria-hidden="true"></i> Todas las convocatorias
+  <RouterLink :to="f ? `/universidades/${f.universidad_id}` : '/universidades'" class="mb-4 inline-flex min-h-11 items-center gap-1 font-bold text-brand underline">
+    <i class="ti ti-arrow-left" aria-hidden="true"></i> {{ f ? f.universidad_nombre : 'Universidades' }}
   </RouterLink>
 
   <AsyncState :cargando="cargando" :error="error" @reintentar="ejecutar">
