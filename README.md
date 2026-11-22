@@ -9,8 +9,8 @@ y la base de datos están en el repositorio del backend.
 
 | Parte | Repositorio |
 |---|---|
-| **Frontend** (este) | https://github.com/rodriguezflorescarol43-beep/hackaton2026-oficial |
-| **Backend** (API y panel) | https://github.com/rodriguezflorescarol43-beep/backend-hackaton |
+| **Frontend** (este) | https://github.com/rodriguezflorescarol43-beep/Rititas-frondend |
+| **Backend** (API y panel) | https://github.com/rodriguezflorescarol43-beep/Rititas-backend |
 
 ## El problema y la solución
 
@@ -20,6 +20,9 @@ o intermitente.
 
 **Solución.** Una guía web instalable (PWA) que reúne todo en un solo lugar y funciona con poca señal.
 
+> **Alcance actual: solo Cochabamba.** Es una versión de prueba con datos reales de la UMSS, UCB, UPB y Univalle y
+> cuatro preuniversitarios. Lo que las fuentes no publican (por ejemplo, costos) **no se inventa ni se muestra**.
+
 **Menú:** Inicio · Preuniversitario (institutos) · Universidades · ¿No sabes qué estudiar? · Contacto.
 Las convocatorias están **dentro de cada universidad**: Universidades → una universidad → una facultad.
 
@@ -27,16 +30,16 @@ Las convocatorias están **dentro de cada universidad**: Universidades → una u
 
 | Sección | Contenido |
 |---|---|
-| **Preuniversitario (institutos)** | Elegir la **facultad** → lista con filtros (Presencial, Virtual, **Cerca de mí**) → detalle con zona, materias, «Cómo llegar», WhatsApp y redes |
-| **Universidades y convocatorias** | Públicas, privadas y técnicas, con costo estimado y becas. Al entrar a una universidad se ven sus **facultades**; al entrar a una facultad se abre su **convocatoria**: fechas, requisitos, costo, carreras y botón para guardar las fechas en el calendario (con alarma un día antes) |
-| **¿No sabes qué estudiar?** | Condiciones → test de 8 preguntas → carreras recomendadas **con el motivo explicado**, **Plan A, B y C**, costo estimado del primer año y simulador «¿y si…?» |
-| **Embajadores** | Estudiantes voluntarios (mayores de 18 años, con consentimiento) que cuentan cómo es su universidad |
-| **Usar sin señal** | Estado de los datos guardados, modo ahorro, y **pasar los datos por WhatsApp** con sello digital |
+| **Inicio** | La ruta paso a paso: descubrir qué estudiar, universidades, prepararte y convocatorias |
+| **Preuniversitario (institutos)** | Elegir la **facultad** → lista con filtros (Presencial, Virtual, **Cerca de mí**) → detalle con zona, materias, «Cómo llegar» y un bloque de **contacto y redes** (teléfono, WhatsApp, Instagram, Facebook, TikTok: solo los que existen) |
+| **Universidades** | Públicas y privadas, cada una con una **descripción corta** y sus canales de contacto. Al entrar a una universidad se ven sus **facultades**; al entrar a una facultad se ven sus **carreras** y su **convocatoria** (fechas, requisitos, imagen del afiche y botón para guardar las fechas en el calendario) |
+| **¿No sabes qué estudiar?** | Test de 8 preguntas → **Plan A, B y C** con el motivo explicado y carreras que te pueden interesar. El Plan C lleva a los **preuniversitarios de la facultad que salió como prioridad** |
+| **Usar sin señal** | Estado de los datos guardados y modo ahorro de datos |
 | **Contacto** | Formulario; si no hay señal, el mensaje se guarda y se envía solo al volver |
 | **Escuchar** | Lee la pantalla en voz alta con la voz del teléfono (necesita una voz en español instalada) |
 
-Cada dato muestra su **fuente** y su **fecha de verificación**. Si no está verificado, la página lo dice:
-«Dato de ejemplo · sin verificar».
+Cada dato muestra su **fuente** y su **fecha de verificación** cuando existen. Si todavía no se confirmó, la página
+lo dice («Tomado de la fuente · falta confirmar»).
 
 ## Pensada para señal débil (no solo «sin internet»)
 
@@ -44,8 +47,8 @@ Con poca señal hay tres problemas: el **peso** de la primera visita, la **laten
 
 | Problema | Qué hace la página | Dónde |
 |---|---|---|
-| Peso | Fuentes solo en letras latinas, **iconos recortados a los 94 que se usan (14 KB en vez de 528 KB)**, compresión en el servidor | `src/main.js`, `scripts/subset_iconos.py` |
-| Latencia | Descarga **un solo archivo** con todo el catálogo (~17 KB) y lo guarda en el teléfono. Las pantallas se llenan sin pedir nada por la red | `src/datos/` |
+| Peso | Fuentes solo en letras latinas, **iconos recortados a los 96 que se usan (14 KB en vez de 528 KB)**, compresión en el servidor | `src/main.js`, `scripts/subset_iconos.py` |
+| Latencia | Descarga **un solo archivo** con todo el catálogo (~31 KB) y lo guarda en el teléfono. Las pantallas se llenan sin pedir nada por la red | `src/datos/` |
 | Cortes | Si los datos no cambiaron, el servidor responde 304 sin cuerpo. Los mensajes escritos sin señal se guardan y se envían solos | `src/utils/cola.js` |
 | Datos viejos | El estado de las convocatorias se calcula **en el teléfono** con la fecha de hoy, aunque los datos se hayan guardado hace días | `src/datos/estado.js` |
 | Datos pesados | **Modo ahorro** (automático o manual): no carga fotos; el video de la portada no se reproduce solo | `src/composables/useAhorro.js` |
@@ -54,11 +57,13 @@ Con poca señal hay tres problemas: el **peso** de la primera visita, la **laten
 
 | | Antes | Ahora |
 |---|---|---|
-| Archivos de la primera visita | 91 | **47** |
-| Peso sin comprimir | 1.400 KB | **406 KB** |
-| Enviado por la red (con compresión) | ~1.400 KB | **~246 KB** |
+| Archivos guardados en la primera visita | 91 | **40** |
+| Peso sin comprimir | 1.400 KB | **313 KB** |
 | Fuentes | 51 archivos, 804 KB | **5 archivos, 77 KB** |
-| Catálogo completo | varias peticiones | **1 archivo de ~17 KB** |
+| Catálogo completo | varias peticiones | **1 archivo de ~31 KB** |
+
+El panel de administración **no se guarda de antemano** en el teléfono del estudiante: así la preparación para usar
+sin señal termina antes.
 
 > Son cifras de la compilación, no de un celular real con red lenta. Mídelas con Lighthouse en «Slow 4G» antes de
 > presentarlas como logro.
@@ -69,9 +74,9 @@ no se envían a ningún servidor. Una prueba automática del repositorio del bac
 mismo** que el del servidor.
 
 ### Paquete de datos firmado
-Los datos viajan en un paquete **firmado (ECDSA P-256)**. La página comprueba el sello con Web Crypto antes de aceptar
-un archivo recibido por WhatsApp: rechaza lo alterado y lo más viejo que lo que ya tiene. Requiere **HTTPS** (o
-`localhost`).
+Los datos viajan en un paquete **firmado (ECDSA P-256)** y la página comprueba el sello con Web Crypto: rechaza lo
+alterado y lo más viejo que lo que ya tiene. Requiere **HTTPS** (o `localhost`). La pantalla para **pasar los datos por
+WhatsApp** se quitó por ahora; el código de verificación sigue en `src/datos/` por si se vuelve a usar.
 
 ## PWA
 
@@ -107,7 +112,7 @@ Necesitas **Node 20+** y el **backend** (Python) corriendo en el puerto 8000.
 
 ```powershell
 # 1. Backend, en otra terminal: sigue las instrucciones de su repositorio
-#    https://github.com/rodriguezflorescarol43-beep/backend-hackaton
+#    https://github.com/rodriguezflorescarol43-beep/Rititas-backend
 # 2. Este frontend
 npm install
 npm run dev          # http://localhost:5173  (las llamadas a /api se envían al backend en :8000)
@@ -136,17 +141,30 @@ de cada dato nunca depende solo del color: lleva forma y texto. La animación se
 
 ## Panel de administración
 
-La ruta `/admin` (no aparece en el menú) trae el panel: editar universidades, facultades, carreras, convocatorias y preuniversitarios, imágenes y videos, portada, **Qué revisar hoy**
-(el Detective) e **Importar propuesta** (datos sugeridos por IA con cita de la fuente, que una persona revisa y
-aprueba). La contraseña y la lógica están en el backend.
+La ruta `/admin` (no aparece en el menú) trae el panel. La contraseña y la lógica están en el backend.
+
+- **Datos:** universidades (con descripción, teléfono y redes), facultades (con la imagen de su convocatoria), carreras,
+  convocatorias y preuniversitarios; **imágenes y videos** y la **portada**.
+- **Qué revisar hoy:** el Detective de datos (reglas y estadística, sin IA).
+- **Importar con IA:** en tres pasos. **«Leer con IA»** (Gemini) lee un PDF o una foto y propone los datos con la frase
+  donde los leyó; la página **comprueba cada frase** contra el documento (semáforo 🟢🟡🔴) y una persona aprueba antes de
+  publicar. Hay un **documento de ejemplo** que funciona sin internet y no se puede publicar, y la alternativa manual con Claude.
+- **Medir la IA:** marcando cada dato, calcula cuánto acierta, cuánto inventa y cuántos errores atrapa el verificador,
+  frente a un método sin IA.
+
+**La IA es solo para el administrador:** los estudiantes nunca la usan. El detalle (clave de Gemini, privacidad y
+seguridad) está en el README del backend.
 
 ## Límites de la versión 1
 
-- **Los datos son de ejemplo.** Falta cargar y verificar los reales.
-- **La primera visita necesita conexión** (~250 KB). Después todo funciona sin señal.
-- **Costos:** son una estimación con los costos publicados.
+- **Solo Cochabamba.** Los datos son reales pero **faltan por confirmar** y no hay costos mensuales ni fechas 2027 de la
+  mayoría de universidades; por eso la página no muestra costos.
+- **La primera visita necesita conexión** (~313 KB). Después todo funciona sin señal.
+- **Fotos:** las universidades, los preuniversitarios y los afiches de convocatoria muestran su foto solo cuando el
+  administrador la sube; mientras tanto se ve un cuadro gris.
 - **«Cómo llegar»** abre el mapa del teléfono; no se incrusta un mapa (pesaría con señal débil).
 - **«Cerca de mí»** usa el GPS solo en el teléfono y necesita que cada preuniversitario tenga latitud y longitud.
 - **No se probó** en un teléfono real ni con red lenta simulada.
 - **Solo español.**
 - El test orienta, **no diagnostica**; así lo dice la propia página.
+
