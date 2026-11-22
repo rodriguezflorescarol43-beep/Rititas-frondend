@@ -15,6 +15,7 @@ const archivoIa = ref(null)
 const leyendo = ref(false)
 const errorIa = ref('')
 const esEjemplo = ref(false) // un ejemplo guardado: se puede revisar pero nunca publicar
+const avisosIa = ref([]) // lo que el servidor tuvo que arreglar o descartar de la respuesta de la IA
 const viaIa = ref(false) // el documento lo leyó la IA integrada (no se pegó a mano)
 
 const copiada = ref(false)
@@ -138,6 +139,7 @@ async function leerConIa() {
   try {
     const r = await adminApi.leerConIa(archivoIa.value)
     viaIa.value = true
+    avisosIa.value = r.avisos ?? []
     textoDocumento.value = r.texto_fuente || ''
     await revisar(r.propuesta, r.texto_fuente || '')
   } catch (e) {
@@ -154,6 +156,7 @@ async function probarEjemplo() {
     const r = await adminApi.ejemploIa()
     esEjemplo.value = true
     viaIa.value = true
+    avisosIa.value = []
     textoDocumento.value = r.texto_fuente
     await revisar(r.propuesta, r.texto_fuente)
   } catch (e) {
@@ -223,6 +226,7 @@ function empezarDeNuevo() {
   errorIa.value = ''
   esEjemplo.value = false
   viaIa.value = false
+  avisosIa.value = []
   paso.value = 1
 }
 
@@ -388,6 +392,13 @@ const campoCambiado = (r) => Object.keys(r.despues ?? {}).map((c) => etiquetaCam
       <span class="inline-flex items-center gap-1 rounded-full bg-brand-soft px-3 py-0.5 font-bold text-brand"><i class="ti ti-cpu" aria-hidden="true"></i> Leído por IA</span>
       Los datos los propuso <strong>{{ analisis.origen }}</strong>. Una IA puede equivocarse: revisa antes de publicar.
     </p>
+
+    <div v-if="avisosIa.length" role="status" class="card mb-4 !border-warn-fg bg-warn-bg text-warn-fg">
+      <p class="font-bold"><i class="ti ti-alert-triangle" aria-hidden="true"></i> La IA devolvió algunos detalles que hubo que arreglar o descartar:</p>
+      <ul class="mt-1 list-disc space-y-0.5 pl-5 text-sm">
+        <li v-for="a in avisosIa" :key="a">{{ a }}</li>
+      </ul>
+    </div>
 
     <!-- Resumen con semáforo -->
     <div class="card mb-4 space-y-3">
