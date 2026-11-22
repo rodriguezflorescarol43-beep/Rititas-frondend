@@ -12,6 +12,9 @@ defineProps({
     <span v-if="verificado" class="font-bold text-ok-fg">
       <i class="ti ti-circle-check" aria-hidden="true"></i> Verificado el {{ fecha(verificado) }}
     </span>
+    <span v-else-if="fuente" class="font-bold text-warn-fg">
+      <i class="ti ti-alert-triangle" aria-hidden="true"></i> Tomado de la fuente · falta confirmar
+    </span>
     <span v-else class="font-bold text-warn-fg">
       <i class="ti ti-alert-triangle" aria-hidden="true"></i> Dato de ejemplo · sin verificar
     </span>

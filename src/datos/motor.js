@@ -192,14 +192,14 @@ export function planes(paquete, resultado, cond = {}, hoy = hoyISO()) {
       Number(a.requiere_mudarse) - Number(b.requiere_mudarse) ||
       (a.costo.incompleto - b.costo.incompleto) ||
       a.costo.total - b.costo.total ||
-      a.duracion_anios - b.duracion_anios ||
+      (a.duracion_anios ?? 99) - (b.duracion_anios ?? 99) ||
       a.carrera_id - b.carrera_id)
     const mejor = pool[0]
     if (mejor) {
       const mejoras = []
       if (A.requiere_mudarse && !mejor.requiere_mudarse) mejoras.push('no necesitas mudarte')
       if (mejor.costo.total < A.costo.total) mejoras.push('cuesta menos')
-      if (mejor.duracion_anios < A.duracion_anios) mejoras.push('dura menos')
+      if (mejor.duracion_anios != null && A.duracion_anios != null && mejor.duracion_anios < A.duracion_anios) mejoras.push('dura menos')
       if (mejoras.length) {
         B = { ...mejor, mejoras, motivo: `Es una alternativa más realista: ${mejoras.join(', ')}.` }
       }

@@ -54,7 +54,7 @@ watch([tipo, departamento], () => ejecutar())
           <span class="chip shrink-0 !min-h-0 !py-0.5">{{ TIPOS[u.tipo] }}</span>
         </div>
         <p class="text-sm text-ink-soft">{{ u.ciudad }} · {{ u.departamento }}</p>
-        <p>Costo estimado: <strong>{{ bs(u.costo_mensual_bs) }}</strong> al mes</p>
+        <p>Costo mensual: <strong>{{ u.costo_mensual_bs == null ? 'por confirmar' : bs(u.costo_mensual_bs) }}</strong></p>
         <p v-if="u.becas"><i class="ti ti-award text-brand" aria-hidden="true"></i> {{ u.becas }}</p>
         <a v-if="u.sitio_web" :href="u.sitio_web" target="_blank" rel="noopener" class="font-bold text-brand underline">Sitio web oficial</a>
         <VerifiedTag :verificado="u.verificado_en" :fuente="u.fuente_url" />

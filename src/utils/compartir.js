@@ -35,7 +35,7 @@ export function textoPlanes(p) {
   if (p.B) carrera('B', p.B)
   if (p.C?.preuniversitario) {
     const pre = p.C.preuniversitario
-    L.push(`PLAN C · Prepararme primero: ${pre.nombre} (${pre.duracion_meses} meses, ${bs(pre.costo_bs)})`)
+    L.push(`PLAN C · Prepararme primero: ${pre.nombre} (${pre.duracion_meses ? `${pre.duracion_meses} meses` : 'duración por confirmar'}, ${bs(pre.costo_bs)})`)
     if (p.C.proxima) {
       L.push(`  Próxima inscripción: ${fecha(p.C.proxima.inscripcion_inicio)} al ${fecha(p.C.proxima.inscripcion_fin)}`)
     }

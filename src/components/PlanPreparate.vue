@@ -18,7 +18,7 @@ defineProps({ plan: { type: Object, required: true } })
     <p>{{ plan.motivo }}</p>
 
     <div v-if="plan.preuniversitario" class="grid grid-cols-3 gap-2 text-sm">
-      <div><p class="text-ink-soft">Dura</p><p class="font-bold">{{ plan.preuniversitario.duracion_meses }} meses</p></div>
+      <div><p class="text-ink-soft">Dura</p><p class="font-bold">{{ plan.preuniversitario.duracion_meses ? `${plan.preuniversitario.duracion_meses} meses` : 'Por confirmar' }}</p></div>
       <div><p class="text-ink-soft">Costo</p><p class="font-bold">{{ bs(plan.preuniversitario.costo_bs) }}</p></div>
       <div><p class="text-ink-soft">Modalidad</p><p class="font-bold">{{ MODALIDAD_PRE[plan.preuniversitario.modalidad] }}</p></div>
     </div>

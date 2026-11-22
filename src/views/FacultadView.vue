@@ -58,7 +58,7 @@ watch(() => props.id, () => ejecutar())
       <ul class="grid gap-3 sm:grid-cols-2">
         <li v-for="c in f.carreras" :key="c.id" class="card">
           <p class="font-bold">{{ c.nombre }}</p>
-          <p class="text-sm text-ink-soft">{{ c.duracion_anios }} años</p>
+          <p class="text-sm text-ink-soft">{{ c.duracion_anios ? `${c.duracion_anios} años` : 'Duración por confirmar' }}</p>
           <p v-if="c.descripcion" class="mt-1">{{ c.descripcion }}</p>
         </li>
       </ul>
@@ -66,7 +66,7 @@ watch(() => props.id, () => ejecutar())
       <h2 class="mb-3 mt-8 text-xl">La universidad</h2>
       <div class="card space-y-1">
         <p class="font-bold">{{ f.universidad.nombre }}</p>
-        <p>Costo estimado: <strong>{{ bs(f.universidad.costo_mensual_bs) }}</strong> al mes</p>
+        <p>Costo mensual: <strong>{{ f.universidad.costo_mensual_bs == null ? 'por confirmar' : bs(f.universidad.costo_mensual_bs) }}</strong></p>
         <p v-if="f.universidad.becas">Becas: {{ f.universidad.becas }}</p>
         <a v-if="f.universidad.sitio_web" :href="f.universidad.sitio_web" target="_blank" rel="noopener" class="font-bold text-brand underline">Sitio web oficial</a>
         <VerifiedTag :verificado="f.universidad.verificado_en" :fuente="f.universidad.fuente_url" />

@@ -28,7 +28,7 @@ defineProps({
       <StatusBadge :estado="plan.estado_convocatoria" />
       <span v-if="plan.requiere_mudarse" class="inline-flex items-center rounded-full bg-warn-bg px-3 py-1 text-sm font-bold text-warn-fg">◆ Tendrías que mudarte</span>
       <span v-else class="inline-flex items-center rounded-full bg-ok-bg px-3 py-1 text-sm font-bold text-ok-fg">✔ Sin mudarte</span>
-      <span class="inline-flex items-center rounded-full bg-off-bg px-3 py-1 text-sm font-bold text-off-fg">{{ plan.duracion_anios }} años</span>
+      <span class="inline-flex items-center rounded-full bg-off-bg px-3 py-1 text-sm font-bold text-off-fg">{{ plan.duracion_anios ? `${plan.duracion_anios} años` : 'Duración por confirmar' }}</span>
     </div>
 
     <CostoPrimerAnio :costo="plan.costo" />

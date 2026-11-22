@@ -54,7 +54,7 @@ const tieneUbicacion = computed(() => !!(p.value?.direccion || (p.value?.latitud
         <div class="rounded-xl bg-off-bg p-3"><dt class="text-sm text-ink-soft">Modalidad</dt><dd class="text-lg font-bold">{{ modalidad }}</dd></div>
         <div class="rounded-xl bg-off-bg p-3"><dt class="text-sm text-ink-soft">Prepara para</dt><dd class="text-lg font-bold">{{ facultades.length }} {{ facultades.length === 1 ? 'facultad' : 'facultades' }}</dd></div>
         <div class="rounded-xl bg-off-bg p-3"><dt class="text-sm text-ink-soft">Atiende por</dt><dd class="text-lg font-bold">{{ p.whatsapp ? 'WhatsApp' : p.contacto ? 'Teléfono' : 'Por confirmar' }}</dd></div>
-        <div class="rounded-xl bg-off-bg p-3"><dt class="text-sm text-ink-soft">Dura</dt><dd class="text-lg font-bold">{{ p.duracion_meses }} meses</dd></div>
+        <div class="rounded-xl bg-off-bg p-3"><dt class="text-sm text-ink-soft">Dura</dt><dd class="text-lg font-bold">{{ p.duracion_meses ? `${p.duracion_meses} meses` : 'Por confirmar' }}</dd></div>
         <div class="rounded-xl bg-off-bg p-3"><dt class="text-sm text-ink-soft">Costo</dt><dd class="text-lg font-bold">{{ bs(p.costo_bs) }}</dd></div>
       </dl>
 

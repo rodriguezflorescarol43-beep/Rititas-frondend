@@ -25,7 +25,7 @@ const u = computed(() => (unis.value ?? []).find((x) => String(x.id) === props.i
   <header v-if="u" class="mb-6 space-y-1">
     <p class="text-sm font-bold text-ink-soft">{{ TIPOS[u.tipo] }} · {{ u.ciudad }} · {{ u.departamento }}</p>
     <h1 class="text-2xl sm:text-3xl">{{ u.nombre }}</h1>
-    <p>Costo estimado: <strong>{{ bs(u.costo_mensual_bs) }}</strong> al mes</p>
+    <p>Costo mensual: <strong>{{ u.costo_mensual_bs == null ? 'por confirmar' : bs(u.costo_mensual_bs) }}</strong></p>
     <p v-if="u.becas"><i class="ti ti-award text-brand" aria-hidden="true"></i> {{ u.becas }}</p>
     <a v-if="u.sitio_web" :href="u.sitio_web" target="_blank" rel="noopener" class="font-bold text-brand underline">Sitio web oficial</a>
     <VerifiedTag :verificado="u.verificado_en" :fuente="u.fuente_url" />
