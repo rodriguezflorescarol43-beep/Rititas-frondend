@@ -9,7 +9,14 @@ import { etiquetaCampo, extraerJson, instruccionParaClaude, ultimaImportacion } 
 const MAX_BYTES = 500 * 1024
 const paso = ref(1)
 
-// Paso 1
+// Paso 1: leer con la IA integrada (Gemini) o, a mano, con Claude
+const { datos: iaEstado } = useAsync(() => adminApi.estadoIa())
+const archivoIa = ref(null)
+const leyendo = ref(false)
+const errorIa = ref('')
+const esEjemplo = ref(false) // un ejemplo guardado: se puede revisar pero nunca publicar
+const viaIa = ref(false) // el documento lo leyó la IA integrada (no se pegó a mano)
+
 const copiada = ref(false)
 const instruccionVisible = ref('')
 const errorPaso1 = ref('')
@@ -31,7 +38,7 @@ const errorAplicar = ref('')
 
 const { datos: historial, ejecutar: recargarHistorial } = useAsync(() => adminApi.registro())
 
-const PASOS = ['Pide los datos a Claude', 'Pega la respuesta', 'Revisa y aprueba']
+const PASOS = ['Elige el documento', 'La IA lo lee', 'Revisa y aprueba']
 const NOMBRE_RECURSO = {
   universidades: 'Universidad', facultades: 'Facultad', carreras: 'Carrera',
   convocatorias: 'Convocatoria', preuniversitarios: 'Preuniversitario',
@@ -91,18 +98,18 @@ async function copiarInstruccion() {
 }
 
 // ---------- Paso 2 ----------
-async function revisar(datos) {
+async function revisar(datos, texto = textoDocumento.value) {
   errorEntrada.value = ''
   resultado.value = null
   errorAplicar.value = ''
   const conDocumento = { ...datos }
-  if (textoDocumento.value.trim()) conDocumento.texto_fuente = textoDocumento.value
+  if (texto && texto.trim()) conDocumento.texto_fuente = texto
   else delete conDocumento.texto_fuente
   analizando.value = true
   try {
     analisis.value = await adminApi.analizarPropuesta(conDocumento)
     propuesta.value = conDocumento
-    ultimaImportacion.value = { propuesta: datos, texto: textoDocumento.value }
+    ultimaImportacion.value = esEjemplo.value ? null : { propuesta: datos, texto: texto || '' }
     for (const k of Object.keys(aprobados)) delete aprobados[k]
     for (const c of analisis.value.cambios) {
       aprobados[c.indice] = false
@@ -111,8 +118,49 @@ async function revisar(datos) {
     paso.value = 3
   } catch (e) {
     errorEntrada.value = e.sinConexion ? 'No hay conexión con el servidor.' : e.message
+    if (paso.value === 1) errorIa.value = errorEntrada.value
   } finally {
     analizando.value = false
+  }
+}
+
+// ---------- Paso 1: «Leer con IA» (Gemini lee el documento y propone; no guarda nada) ----------
+function elegirDocumento(evento) {
+  archivoIa.value = evento.target.files?.[0] ?? null
+  errorIa.value = ''
+}
+
+async function leerConIa() {
+  if (!archivoIa.value) return
+  errorIa.value = ''
+  esEjemplo.value = false
+  leyendo.value = true
+  try {
+    const r = await adminApi.leerConIa(archivoIa.value)
+    viaIa.value = true
+    textoDocumento.value = r.texto_fuente || ''
+    await revisar(r.propuesta, r.texto_fuente || '')
+  } catch (e) {
+    errorIa.value = e.sinConexion ? 'No hay conexión con el servidor.' : e.message
+  } finally {
+    leyendo.value = false
+  }
+}
+
+async function probarEjemplo() {
+  errorIa.value = ''
+  leyendo.value = true
+  try {
+    const r = await adminApi.ejemploIa()
+    esEjemplo.value = true
+    viaIa.value = true
+    textoDocumento.value = r.texto_fuente
+    await revisar(r.propuesta, r.texto_fuente)
+  } catch (e) {
+    esEjemplo.value = false
+    errorIa.value = e.sinConexion ? 'No hay conexión con el servidor.' : e.message
+  } finally {
+    leyendo.value = false
   }
 }
 
@@ -150,6 +198,7 @@ function marcarVerdes() {
 }
 
 async function aplicar() {
+  if (esEjemplo.value) return
   errorAplicar.value = ''
   aplicando.value = true
   try {
@@ -170,6 +219,10 @@ function empezarDeNuevo() {
   textoDocumento.value = ''
   errorEntrada.value = ''
   copiada.value = false
+  archivoIa.value = null
+  errorIa.value = ''
+  esEjemplo.value = false
+  viaIa.value = false
   paso.value = 1
 }
 
@@ -183,8 +236,8 @@ const campoCambiado = (r) => Object.keys(r.despues ?? {}).map((c) => etiquetaCam
 <template>
   <h1 class="mb-1 text-2xl">Importar con IA</h1>
   <p class="mb-5 max-w-3xl text-ink-soft">
-    Claude lee la convocatoria (PDF o foto) por ti. Esta página <strong>revisa que no haya inventado nada</strong> y
-    tú decides qué se publica. Nada se guarda sin tu aprobación.
+    Una IA lee la convocatoria (PDF o foto) por ti. Esta página <strong>revisa que no haya inventado nada</strong> y
+    tú decides qué se publica. Nada se guarda sin tu aprobación. La IA es solo para el administrador: los estudiantes nunca la usan.
   </p>
 
   <!-- Indicador de pasos -->
@@ -201,33 +254,73 @@ const campoCambiado = (r) => Object.keys(r.despues ?? {}).map((c) => etiquetaCam
   </ol>
 
   <!-- PASO 1 -->
-  <section v-if="paso === 1" class="card space-y-4" aria-labelledby="p1">
-    <h2 id="p1" class="text-xl">Paso 1 · Pídele los datos a Claude</h2>
-    <ol class="list-decimal space-y-2 pl-6">
-      <li>Toca <strong>«Copiar instrucción»</strong>. Ya incluye las reglas y la lista de universidades de tu página.</li>
-      <li>Abre Claude, <strong>adjunta el PDF o la foto</strong> de la convocatoria y <strong>pega</strong> la instrucción.</li>
-      <li>Cuando Claude responda, <strong>copia toda su respuesta</strong> y vuelve aquí.</li>
-    </ol>
-    <div class="flex flex-wrap gap-3">
-      <button type="button" class="btn-primary" @click="copiarInstruccion">
-        <i class="ti" :class="copiada ? 'ti-check' : 'ti-copy'" aria-hidden="true"></i>
-        {{ copiada ? '¡Copiada!' : 'Copiar instrucción' }}
-      </button>
-      <a href="https://claude.ai/new" target="_blank" rel="noopener" class="btn-ghost">
-        <i class="ti ti-external-link" aria-hidden="true"></i> Abrir Claude
-      </a>
+  <section v-if="paso === 1" class="card space-y-5" aria-labelledby="p1">
+    <h2 id="p1" class="text-xl">Paso 1 · Elige el documento</h2>
+
+    <!-- La IA integrada lee el documento aquí mismo: no hace falta abrir otra ventana ni tener cuenta de Claude. -->
+    <div v-if="iaEstado?.disponible" class="space-y-3 rounded-xl bg-brand-soft p-4">
+      <p class="text-lg font-bold"><i class="ti ti-cpu text-brand" aria-hidden="true"></i> Leer con IA <span class="text-sm font-normal text-ink-soft">({{ iaEstado.modelo }})</span></p>
+      <p class="text-sm">
+        Sube la convocatoria (PDF o foto). La IA propone los datos con la frase donde los leyó, y esta página comprueba
+        que cada frase exista. <strong>Nada se publica sin tu aprobación.</strong>
+      </p>
+      <div class="flex flex-wrap items-center gap-3">
+        <label class="btn-ghost cursor-pointer bg-card has-[:focus-visible]:outline has-[:focus-visible]:outline-2">
+          <i class="ti ti-upload" aria-hidden="true"></i>
+          <span class="max-w-56 truncate">{{ archivoIa ? archivoIa.name : 'Elegir PDF o foto' }}</span>
+          <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/*" class="sr-only" @change="elegirDocumento" />
+        </label>
+        <button type="button" class="btn-primary" :disabled="!archivoIa || leyendo" :aria-busy="leyendo" @click="leerConIa">
+          <i class="ti" :class="leyendo ? 'ti-loader-2 animate-spin' : 'ti-cpu'" aria-hidden="true"></i>
+          {{ leyendo ? 'Leyendo…' : 'Leer con IA' }}
+        </button>
+      </div>
+      <p v-if="leyendo" role="status" class="font-bold">La IA está leyendo el documento… puede tardar hasta un minuto.</p>
+      <p class="text-xs text-ink-soft">Sube solo documentos públicos. Con el nivel gratis, Google puede usar lo que envíes para mejorar sus productos.</p>
     </div>
-    <p v-if="copiada" role="status" class="font-bold text-ok-fg">Listo: ahora pégala en Claude junto con el documento.</p>
-    <p v-if="errorPaso1" role="alert" class="font-bold text-bad-fg">{{ errorPaso1 }}</p>
-    <details v-if="instruccionVisible" class="text-sm">
-      <summary class="cursor-pointer font-bold">Ver la instrucción</summary>
-      <textarea readonly rows="8" class="field mt-2 font-mono text-xs" :value="instruccionVisible" aria-label="Instrucción para Claude"></textarea>
+    <p v-else-if="iaEstado" class="rounded-xl bg-off-bg p-3 text-sm">
+      <i class="ti ti-info-circle" aria-hidden="true"></i>
+      «Leer con IA» no está activado (falta la clave en el servidor). Puedes probar el ejemplo o usar Claude a mano.
+    </p>
+    <p v-if="errorIa" role="alert" class="font-bold text-bad-fg">{{ errorIa }}</p>
+
+    <div class="space-y-1">
+      <button type="button" class="btn-ghost" :disabled="leyendo" @click="probarEjemplo">
+        <i class="ti ti-file-import" aria-hidden="true"></i> Probar con un documento de ejemplo
+      </button>
+      <p class="text-sm text-ink-soft">Una respuesta de IA guardada sobre un documento ficticio, con un error a propósito. Sirve para ver el semáforo; no se puede publicar.</p>
+    </div>
+
+    <details class="rounded-xl border-2 border-line p-3">
+      <summary class="cursor-pointer font-bold">Sin la IA integrada: usar Claude a mano</summary>
+      <div class="mt-3 space-y-4">
+      <ol class="list-decimal space-y-2 pl-6">
+        <li>Toca <strong>«Copiar instrucción»</strong>. Ya incluye las reglas y la lista de universidades de tu página.</li>
+        <li>Abre Claude, <strong>adjunta el PDF o la foto</strong> de la convocatoria y <strong>pega</strong> la instrucción.</li>
+        <li>Cuando Claude responda, <strong>copia toda su respuesta</strong> y vuelve aquí.</li>
+      </ol>
+      <div class="flex flex-wrap gap-3">
+        <button type="button" class="btn-primary" @click="copiarInstruccion">
+          <i class="ti" :class="copiada ? 'ti-check' : 'ti-copy'" aria-hidden="true"></i>
+          {{ copiada ? '¡Copiada!' : 'Copiar instrucción' }}
+        </button>
+        <a href="https://claude.ai/new" target="_blank" rel="noopener" class="btn-ghost">
+          <i class="ti ti-external-link" aria-hidden="true"></i> Abrir Claude
+        </a>
+      </div>
+      <p v-if="copiada" role="status" class="font-bold text-ok-fg">Listo: ahora pégala en Claude junto con el documento.</p>
+      <p v-if="errorPaso1" role="alert" class="font-bold text-bad-fg">{{ errorPaso1 }}</p>
+      <details v-if="instruccionVisible" class="text-sm">
+        <summary class="cursor-pointer font-bold">Ver la instrucción</summary>
+        <textarea readonly rows="8" class="field mt-2 font-mono text-xs" :value="instruccionVisible" aria-label="Instrucción para Claude"></textarea>
+      </details>
+      <div class="border-t-2 border-line pt-4">
+        <button type="button" class="btn-primary" @click="paso = 2">
+          Ya tengo la respuesta de Claude <i class="ti ti-arrow-right" aria-hidden="true"></i>
+        </button>
+      </div>
+      </div>
     </details>
-    <div class="border-t-2 border-line pt-4">
-      <button type="button" class="btn-primary" @click="paso = 2">
-        Ya tengo la respuesta de Claude <i class="ti ti-arrow-right" aria-hidden="true"></i>
-      </button>
-    </div>
   </section>
 
   <!-- PASO 2 -->
@@ -282,10 +375,19 @@ const campoCambiado = (r) => Object.keys(r.despues ?? {}).map((c) => etiquetaCam
           <span v-if="analisis.origen"> · lo propuso: {{ analisis.origen }}</span>
         </p>
       </div>
-      <button type="button" class="btn-ghost !min-h-10 !px-4 !py-1.5 text-sm" @click="paso = 2">
-        <i class="ti ti-arrow-left" aria-hidden="true"></i> Cambiar lo pegado
+      <button type="button" class="btn-ghost !min-h-10 !px-4 !py-1.5 text-sm" @click="viaIa ? empezarDeNuevo() : (paso = 2)">
+        <i class="ti ti-arrow-left" aria-hidden="true"></i> {{ viaIa ? 'Elegir otro documento' : 'Cambiar lo pegado' }}
       </button>
     </div>
+
+    <p v-if="esEjemplo" role="status" class="card mb-4 !border-warn-fg bg-warn-bg font-bold text-warn-fg">
+      <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+      Esto es un ejemplo con un documento ficticio: sirve para ver el semáforo. No se puede publicar.
+    </p>
+    <p v-else-if="analisis.origen" class="mb-3 text-sm">
+      <span class="inline-flex items-center gap-1 rounded-full bg-brand-soft px-3 py-0.5 font-bold text-brand"><i class="ti ti-cpu" aria-hidden="true"></i> Leído por IA</span>
+      Los datos los propuso <strong>{{ analisis.origen }}</strong>. Una IA puede equivocarse: revisa antes de publicar.
+    </p>
 
     <!-- Resumen con semáforo -->
     <div class="card mb-4 space-y-3">
@@ -304,8 +406,8 @@ const campoCambiado = (r) => Object.keys(r.despues ?? {}).map((c) => etiquetaCam
       </p>
       <p v-else class="text-sm font-bold text-warn-fg">
         <i class="ti ti-alert-triangle" aria-hidden="true"></i>
-        No pegaste el texto del documento: no se pudo revisar si las frases son reales.
-        <button type="button" class="underline" @click="paso = 2">Pegarlo ahora</button>
+        {{ viaIa ? 'El documento es una foto (sin texto): no se puede comprobar si las frases son reales. Revisa cada dato con el documento a la vista.' : 'No pegaste el texto del documento: no se pudo revisar si las frases son reales.' }}
+        <button v-if="!viaIa" type="button" class="underline" @click="paso = 2">Pegarlo ahora</button>
       </p>
     </div>
 
@@ -328,7 +430,10 @@ const campoCambiado = (r) => Object.keys(r.despues ?? {}).map((c) => etiquetaCam
       <li v-for="c in cambios" :key="c.indice" class="card space-y-3 !border-l-8" :class="[SEMAFORO[c.semaforo].borde, aprobados[c.indice] ? 'ring-2 ring-brand' : '']">
         <div class="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <p class="text-sm font-bold text-ink-soft">{{ c.accion === 'crear' ? 'Nuevo' : 'Actualizar' }} · {{ NOMBRE_RECURSO[c.recurso] }}</p>
+            <p class="text-sm font-bold text-ink-soft">
+              {{ c.accion === 'crear' ? 'Nuevo' : 'Actualizar' }} · {{ NOMBRE_RECURSO[c.recurso] }}
+              <span class="ml-1 inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-0.5 text-brand"><i class="ti ti-cpu" aria-hidden="true"></i> Leído por IA</span>
+            </p>
             <h3 class="text-lg">{{ c.titulo }}</h3>
           </div>
           <span class="rounded-full px-3 py-1 text-sm font-bold" :class="SEMAFORO[c.semaforo].clase">
@@ -379,21 +484,23 @@ const campoCambiado = (r) => Object.keys(r.despues ?? {}).map((c) => etiquetaCam
           </table>
         </div>
 
-        <label class="flex items-center gap-3 rounded-xl p-1" :class="c.valido ? 'cursor-pointer' : 'opacity-60'">
-          <input v-model="aprobados[c.indice]" type="checkbox" class="size-6 accent-brand" :disabled="!c.valido" />
-          <span class="font-bold">{{ c.valido ? 'Aprobar y publicar este cambio' : 'No se puede aprobar: tiene errores' }}</span>
+        <label class="flex items-center gap-3 rounded-xl p-1" :class="c.valido && !esEjemplo ? 'cursor-pointer' : 'opacity-60'">
+          <input v-model="aprobados[c.indice]" type="checkbox" class="size-6 accent-brand" :disabled="!c.valido || esEjemplo" />
+          <span class="font-bold">{{ esEjemplo ? 'Ejemplo: no se puede publicar' : c.valido ? 'Aprobar y publicar este cambio' : 'No se puede aprobar: tiene errores' }}</span>
         </label>
       </li>
     </ul>
 
     <div class="sticky bottom-0 mt-5 flex flex-wrap items-center gap-3 border-t-2 border-line bg-paper py-3">
-      <button type="button" class="btn-ghost" :disabled="!verdes.length" @click="marcarVerdes">
+      <button type="button" class="btn-ghost" :disabled="!verdes.length || esEjemplo" @click="marcarVerdes">
         <i class="ti ti-circle-check" aria-hidden="true"></i> {{ verdes.length === 1 ? 'Marcar el verde' : `Marcar los ${verdes.length} verdes` }}
       </button>
-      <button type="button" class="btn-primary" :disabled="!lista.length || aplicando" :aria-busy="aplicando" @click="aplicar">
+      <button type="button" class="btn-primary" :disabled="!lista.length || aplicando || esEjemplo" :aria-busy="aplicando" @click="aplicar">
         {{ aplicando ? 'Publicando…' : `Publicar ${lista.length} ${lista.length === 1 ? 'cambio' : 'cambios'}` }}
       </button>
-      <span v-if="!lista.length" class="text-sm text-ink-soft">Marca lo que quieres publicar.</span>
+      <span v-if="esEjemplo" class="text-sm font-bold text-warn-fg">Es un ejemplo.</span>
+      <button v-if="esEjemplo" type="button" class="btn-primary" @click="empezarDeNuevo">Probar con mi documento</button>
+      <span v-else-if="!lista.length" class="text-sm text-ink-soft">Marca lo que quieres publicar.</span>
     </div>
     <p class="mt-1 text-sm text-ink-soft">
       Al publicar, cada dato queda con la <strong>fecha de hoy como verificado</strong> y en el historial queda de qué fuente y con qué frase salió.

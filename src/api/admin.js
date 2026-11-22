@@ -42,6 +42,13 @@ export const adminApi = {
   analizarPropuesta: (propuesta) => admin('/propuestas/analizar', { metodo: 'POST', cuerpo: propuesta }),
   aplicarPropuesta: (propuesta, aprobados) =>
     admin('/propuestas/aplicar', { metodo: 'POST', cuerpo: { propuesta, aprobados } }),
+  estadoIa: () => admin('/ia/estado'),
+  ejemploIa: () => admin('/ia/ejemplo'),
+  leerConIa: (archivo) => {
+    const datos = new FormData()
+    datos.append('archivo', archivo)
+    return admin('/ia/leer', { metodo: 'POST', archivo: datos })
+  },
   medirIa: (datos) => admin('/mediciones', { metodo: 'POST', cuerpo: datos }),
   mediciones: () => admin('/mediciones'),
 }
